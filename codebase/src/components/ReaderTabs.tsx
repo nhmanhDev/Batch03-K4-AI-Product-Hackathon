@@ -105,7 +105,7 @@ export function ReaderTabs({
       if (!res.ok) {
         setChatMessages(prev => [...prev, {
           sender: "ai",
-          badge: "🔌 LỖI GỌI AI",
+          badge: res.status === 429 ? "⏳ HỎI HƠI NHANH" : "🔌 LỖI GỌI AI",
           text: `${d.error ?? "Không gọi được model."}${
             d.attempts?.length
               ? `\n\nĐã thử: ${d.attempts.map((a: { provider: string; error: string }) => `${a.provider} (${a.error})`).join(" → ")}`

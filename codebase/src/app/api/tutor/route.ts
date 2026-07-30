@@ -8,6 +8,32 @@ import d2Deck from "@/data/d2-pages.json";
 type DeckId = "d1" | "d2";
 const DECKS: Record<DeckId, typeof d1Deck> = { d1: d1Deck, d2: d2Deck };
 
+/**
+ * Rate limit đơn giản — chặn kịch bản hỏi liên tục nhiều trang khác nhau để
+ * dựng lại gần hết nội dung slide qua nhiều lượt nhỏ (rò rỉ gián tiếp, xem
+ * roadmap-nang-cap.md mục 5). In-memory, reset khi cold start — đủ cho quy mô
+ * demo hackathon, KHÔNG phải giải pháp production (cần Redis/DB khi nhiều
+ * instance chạy song song, xem roadmap mục 4).
+ */
+// 40/phút — đủ rộng để golden set 20 case (eval/run.mjs, cách nhau 1.5s +
+// tối đa 3 lần retry/case) không bị chặn nhầm, nhưng vẫn chặn được kịch bản
+// dò nhanh không nghỉ (>40 request/phút không phải hành vi gõ tay thật).
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 40;
+const requestLog = new Map<string, number[]>();
+
+function checkRateLimit(key: string): { ok: boolean; retryAfterSec?: number } {
+  const now = Date.now();
+  const hits = (requestLog.get(key) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (hits.length >= RATE_LIMIT_MAX) {
+    const retryAfterSec = Math.ceil((RATE_LIMIT_WINDOW_MS - (now - hits[0])) / 1000);
+    return { ok: false, retryAfterSec };
+  }
+  hits.push(now);
+  requestLog.set(key, hits);
+  return { ok: true };
+}
+
 const MODELS = {
   gemini: process.env.GEMINI_MODEL || "gemini-3.1-flash-lite",
   deepseek: process.env.DEEPSEEK_MODEL || "deepseek-v4-flash",
@@ -255,6 +281,21 @@ function stripContentDemand<T extends { answer: string; missing: string }>(
 }
 
 export async function POST(req: NextRequest) {
+  const clientKey =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    req.headers.get("x-real-ip") ||
+    "local";
+  const limit = checkRateLimit(clientKey);
+  if (!limit.ok) {
+    return NextResponse.json(
+      {
+        error: `Bạn hỏi hơi nhanh — chờ ${limit.retryAfterSec}s rồi hỏi tiếp nhé.`,
+        _meta: { reason: "rate_limited" },
+      },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } }
+    );
+  }
+
   let question = "";
   let currentPage = 1;
   let deckId: DeckId = "d1";
