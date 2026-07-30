@@ -23,7 +23,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    if (email.trim().toLowerCase() !== DEMO_EMAIL || password !== DEMO_PASSWORD) {
+    if (email.trim().toLowerCase() !== DEMO_EMAIL.toLowerCase() || password !== DEMO_PASSWORD) {
       setError("Sai email hoặc mật khẩu demo. Dùng tài khoản mẫu bên dưới.");
       return;
     }
