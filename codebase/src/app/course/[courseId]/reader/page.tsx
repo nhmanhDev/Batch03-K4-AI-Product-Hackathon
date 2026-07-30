@@ -14,7 +14,7 @@ const SAMPLE_CURRICULUM: DayCurriculum[] = [
   {
     id: "Lecture_material_ms203mb1_squf06",
     public_code: "D01",
-    title: "Day 01: Generative AI & LLM Foundations",
+    title: "Day 01: AI & LLM Foundation",
     status: "published",
     position: 1,
     material_count: 2,
@@ -26,12 +26,13 @@ const SAMPLE_CURRICULUM: DayCurriculum[] = [
         id: "material_ms2039d0_hnxpxy",
         public_code: "D01-S01",
         type: "pdf",
-        title: "day01-slide-blue-v0.pdf",
+        title: "d1-slide-hackathon.pdf",
         status: "studying",
         lecture_id: "Lecture_material_ms2039d0_hnxpxy",
         position: 1,
-        page_count: 23,
-        file_name: "day01-slide-blue-v0.pdf"
+        page_count: 29,
+        file_name: "d1-slide-hackathon.pdf",
+        deck: "d1"
       },
       {
         id: "material_ms203mb1_squf06",
@@ -49,7 +50,7 @@ const SAMPLE_CURRICULUM: DayCurriculum[] = [
   {
     id: "Lecture_material_ms203vsq_ob7vqp",
     public_code: "D02",
-    title: "Day 02: Transformer Architecture & Self-Attention",
+    title: "Day 02: Xác định bài toán cho AI",
     status: "published",
     position: 2,
     material_count: 1,
@@ -61,12 +62,13 @@ const SAMPLE_CURRICULUM: DayCurriculum[] = [
         id: "material_ms203vsq_ob7vqp",
         public_code: "D02-S01",
         type: "pdf",
-        title: "day02_c302.pdf",
+        title: "d2-slide-hackathon.pdf",
         status: "published",
         lecture_id: "Lecture_material_ms203vsq_ob7vqp",
         position: 1,
-        page_count: 23,
-        file_name: "day02-slide-blue.pdf"
+        page_count: 29,
+        file_name: "d2-slide-hackathon.pdf",
+        deck: "d2"
       }
     ]
   },
@@ -240,6 +242,7 @@ export default function ReaderPage() {
           currentPage={currentPage}
           totalPages={totalPages}
           materialTitle={selectedMaterial.title}
+          deck={selectedMaterial.deck}
         />
       </div>
 

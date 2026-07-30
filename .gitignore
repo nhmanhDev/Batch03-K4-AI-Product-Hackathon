@@ -17,3 +17,10 @@ venv/
 scripts/
 scratch/
 docs/research/
+
+# Slide bản đầy đủ tự tải thêm — KHÔNG thuộc pack chính thức BTC cấp
+# (chỉ 2 file d1/d2-slide-hackathon.pdf mới được cấp, xem data/vlearn-pack/README.md).
+# 02-guide.md §5.2: "không đổ nguyên data pack lên" — chặn cứng ở đây,
+# không phụ thuộc việc nhớ tránh mỗi lần git add.
+data/vlearn-pack/slides/D[0-9]*.pdf
+day01-slide-blue-v0.pdf

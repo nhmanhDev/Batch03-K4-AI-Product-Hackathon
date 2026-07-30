@@ -29,11 +29,19 @@ Xếp theo cost-of-error và bằng chứng đã có, không xếp theo độ "n
 
 **Effort:** cao (cần chọn vector DB, viết pipeline embed, đổi route.ts từ "outline đầy đủ" sang "retrieval top-k"). **Điều phải giữ khi đổi:** hai lớp chặn cứng hiện tại (`validateCitations()`, `stripContentDemand()`) — retrieval đổi cách lấy context, không đổi luật chặn sau khi model trả lời.
 
+### Kiến trúc tham khảo — 3 bài đối chiếu, xem [tham-khao/](tham-khao/)
+
+*(Không phải tự nghĩ — đối chiếu với literature RAG hiện tại để chọn đúng mức độ, không over-engineer.)*
+
+- **[rag-02-ragvsgraphrag-eval.pdf](tham-khao/rag-02-ragvsgraphrag-eval.pdf)** (Han et al.) — baseline chuẩn cho mục này chính là **dense-retrieval RAG**: *"segment documents into textual chunks and build an index by embedding each chunk into a shared vector space; at inference time, embed the query, retrieve top-ranked chunks"*. Đây đúng là pipeline mục 2 đề xuất — không cần GraphRAG ngay từ đầu, đó là baseline đã được benchmark kỹ, đủ tốt cho slide bài giảng (không phải multi-hop knowledge base phức tạp).
+- **[rag-01-document-level-knowledge-graph.pdf](tham-khao/rag-01-document-level-knowledge-graph.pdf)** (RAKG) — hướng nâng cấp **nếu** dense-retrieval không đủ: trích "pre-entity" (khái niệm) từ mỗi chunk làm truy vấn trung gian, giải quyết đúng vấn đề *"long-context forgetting"* — liên hệ trực tiếp tới phát hiện thật của nhóm ở golden set case C02 (§eval/run-08.md): model trả lời đúng nội dung RLHF nhưng lấy từ trang 19 dù đang mở trang 21, vì chỉ thấy tên khái niệm trong outline rút gọn. RAKG-style: nối "RLHF" (trang 21 nhắc tới) → node "RLHF" (định nghĩa đầy đủ ở trang 19) bằng cạnh tường minh, thay vì để model tự suy luận qua outline 90 ký tự/trang.
+- **[rag-03-reasoning-rag-survey.pdf](tham-khao/rag-03-reasoning-rag-survey.pdf)** — phân loại **System 1 (predefined reasoning — pipeline cố định, có thể audit)** vs **System 2 (agentic reasoning — model tự quyết khi nào retrieve/gọi tool)**. `route.ts` hiện tại **là System 1 có chủ đích**: một lời gọi, quyết định chốt, 2 lớp chặn cứng độc lập với model — đúng lựa chọn cho quyết định real-time, chi phí sai thấp, kiểm chứng được (khớp automation "Conditional" đã chọn trong spec §4, lý do cost-of-error). System 2 (agentic, đa bước) chỉ đáng đánh đổi độ trễ + chi phí khi câu hỏi cần tổng hợp nhiều nguồn — không phải use case chính của lát cắt này.
+
 ## 3 · Chunking / indexing strategy — đi kèm mục 2
 
 **Vấn đề:** trang slide dài (VD trang 7 của d1: ~800+ ký tự) nhét nguyên trang vào context ổn ở quy mô nhỏ, nhưng chunk theo *ý* (mỗi bullet/section một chunk) sẽ cho retrieval chính xác hơn theo trang khi mở rộng — đặc biệt hữu ích cho case "cả bộ" (`scope=deck`) hiện đang nhét *toàn bộ* outline, sẽ không scale khi có >50 trang.
 
-**Đề xuất:** heuristic đơn giản trước (chunk theo dòng trống / heading pattern đã có trong `extract-pdf.mjs` — code trích theo tọa độ y nên đã giữ được cấu trúc dòng), chưa cần NLP phức tạp ở giai đoạn này.
+**Đề xuất:** heuristic đơn giản trước (chunk theo dòng trống / heading pattern đã có trong `extract-pdf.mjs` — code trích theo tọa độ y nên đã giữ được cấu trúc dòng), chưa cần NLP phức tạp ở giai đoạn này. Nếu cần chính xác hơn nữa, RAKG (trên) gợi ý bước trung gian: NER trích "pre-entity" từ mỗi chunk trước khi embed, giảm nhiễu do coreference (chunk nhắc "nó", "model đó" mà không rõ đối tượng).
 
 ## 4 · Worker pool / xử lý nhiều học viên đồng thời — ưu tiên thấp cho hackathon, cao cho production thật
 

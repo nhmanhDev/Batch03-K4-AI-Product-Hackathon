@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 // Corpus là bản slide hackathon THẬT trong data pack (không phải
 // day01-slide-blue-v0/v1 — bản đó không thuộc data pack được cấp).
 // Xem scripts/extract-pdf.mjs và cp1/impact-table.md giới hạn #8.
-import deck from "@/data/d1-pages.json";
+import d1Deck from "@/data/d1-pages.json";
+import d2Deck from "@/data/d2-pages.json";
+
+type DeckId = "d1" | "d2";
+const DECKS: Record<DeckId, typeof d1Deck> = { d1: d1Deck, d2: d2Deck };
 
 const MODELS = {
   gemini: process.env.GEMINI_MODEL || "gemini-3.1-flash-lite",
@@ -21,15 +25,19 @@ type TutorDecision = {
 };
 
 /** Trang không có text trích xuất được (slide dạng ảnh) — không thể là nguồn trích dẫn. */
-const pagesWithText = new Set(deck.pages.filter((p) => p.chars > 0).map((p) => p.page));
+function pagesWithTextOf(deck: typeof d1Deck) {
+  return new Set(deck.pages.filter((p) => p.chars > 0).map((p) => p.page));
+}
 
-const outline = deck.pages
-  .map((p) =>
-    p.chars > 0
-      ? `Trang ${p.page}: ${p.text.replace(/\n/g, " ").slice(0, 90)}`
-      : `Trang ${p.page}: [KHÔNG có text trích xuất được — slide dạng ảnh]`
-  )
-  .join("\n");
+function outlineOf(deck: typeof d1Deck) {
+  return deck.pages
+    .map((p) =>
+      p.chars > 0
+        ? `Trang ${p.page}: ${p.text.replace(/\n/g, " ").slice(0, 90)}`
+        : `Trang ${p.page}: [KHÔNG có text trích xuất được — slide dạng ảnh]`
+    )
+    .join("\n");
+}
 
 const SYSTEM = `Bạn là trợ giảng AI của khoá học, trả lời trong trang học VLearn.
 
@@ -171,7 +179,12 @@ function providerChain(user: string) {
  * Chặn cứng điều kiện cứng số 1: không bịa trích dẫn.
  * Model có thể cite sai — server loại bỏ trích dẫn không thể hợp lệ.
  */
-function validateCitations(d: TutorDecision, currentPage: number) {
+function validateCitations(
+  d: TutorDecision,
+  currentPage: number,
+  pagesWithText: Set<number>,
+  totalPages: number
+) {
   const dropped: number[] = [];
   const kept = (d.citations || []).filter((n) => {
     const ok = Number.isInteger(n) && pagesWithText.has(n);
@@ -192,7 +205,7 @@ function validateCitations(d: TutorDecision, currentPage: number) {
       missing:
         d.missing ||
         `Mình chưa đọc được nội dung có căn cứ cho câu này ở trang ${currentPage}. ` +
-          `Bạn muốn mình tìm trong cả bộ ${deck.totalPages} trang không?`,
+          `Bạn muốn mình tìm trong cả bộ ${totalPages} trang không?`,
       _guardrail: { dropped, reason: "no_valid_citation_after_filter" },
     };
   }
@@ -209,14 +222,15 @@ const DEMANDS_CONTENT =
 
 function stripContentDemand<T extends { answer: string; missing: string }>(
   d: T,
-  currentPage: number
+  currentPage: number,
+  totalPages: number
 ) {
   const hits = [d.answer, d.missing].filter((t) => DEMANDS_CONTENT.test(t || ""));
   if (!hits.length) return d;
 
   const fallback =
     `Mình chưa đọc được đủ nội dung có căn cứ cho câu này ở trang ${currentPage}. ` +
-    `Bạn muốn mình tìm trong cả bộ ${deck.totalPages} trang, hay chỉ trong một khoảng trang cụ thể?`;
+    `Bạn muốn mình tìm trong cả bộ ${totalPages} trang, hay chỉ trong một khoảng trang cụ thể?`;
 
   return {
     ...d,
@@ -235,16 +249,22 @@ function stripContentDemand<T extends { answer: string; missing: string }>(
 export async function POST(req: NextRequest) {
   let question = "";
   let currentPage = 1;
+  let deckId: DeckId = "d1";
   try {
     const body = await req.json();
     question = String(body.question ?? "").slice(0, 2000);
     currentPage = Number(body.currentPage) || 1;
+    if (body.deck === "d1" || body.deck === "d2") deckId = body.deck;
   } catch {
     return NextResponse.json({ error: "Body không phải JSON hợp lệ." }, { status: 400 });
   }
   if (!question.trim()) {
     return NextResponse.json({ error: "Thiếu question." }, { status: 400 });
   }
+
+  const deck = DECKS[deckId];
+  const pagesWithText = pagesWithTextOf(deck);
+  const outline = outlineOf(deck);
 
   const page = deck.pages.find((p) => p.page === currentPage);
   const pageBlock = page?.chars
@@ -282,13 +302,19 @@ ${question}`;
       } catch {
         throw new Error(`JSON không parse được: ${raw.slice(0, 120)}`);
       }
+      const guarded = stripContentDemand(
+        validateCitations(decision, currentPage, pagesWithText, deck.totalPages),
+        currentPage,
+        deck.totalPages
+      );
       return NextResponse.json({
-        ...stripContentDemand(validateCitations(decision, currentPage), currentPage),
+        ...guarded,
         _meta: {
           provider: p.name,
           model: p.model,
           latencyMs: Date.now() - started,
           fellBackFrom: attempts.map((a) => a.provider),
+          deck: deckId,
           currentPage,
           totalPages: deck.totalPages,
         },

@@ -17,6 +17,8 @@ export interface MaterialItem {
   position: number;
   page_count?: number;
   file_name?: string;
+  /** Deck có corpus thật để AI ground vào (xem codebase/src/data/). Không có = chưa có học liệu thật, AI Tutor tắt cho tài liệu này. */
+  deck?: 'd1' | 'd2';
 }
 
 export interface DayCurriculum {

@@ -21,6 +21,8 @@ interface ReaderTabsProps {
   currentPage?: number;
   totalPages?: number;
   materialTitle?: string;
+  /** Deck có corpus thật (xem src/data/). Không có = tài liệu này chưa có học liệu thật, AI Tutor tắt. */
+  deck?: "d1" | "d2";
 }
 
 export function ReaderTabs({
@@ -28,8 +30,9 @@ export function ReaderTabs({
   onClose,
   initialTab = "tutor",
   currentPage = 1,
-  totalPages = 23,
-  materialTitle = "day01-slide-blue-v0.pdf"
+  totalPages = 29,
+  materialTitle = "d1-slide-hackathon.pdf",
+  deck
 }: ReaderTabsProps) {
   const [activeTab, setActiveTab] = useState<"mindmap" | "flashcards" | "notes" | "tutor">(initialTab);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -43,7 +46,9 @@ export function ReaderTabs({
   }>>([
     {
       sender: "ai",
-      text: `Xin chào NGUYỄN HÙNG MẠNH! Mình là AI Tutor VLearn. Bạn đang xem tài liệu "${materialTitle}" (Trang ${currentPage}/${totalPages}). Bạn có thắc mắc gì cần giải đáp không?`
+      text: deck
+        ? `Xin chào! Mình là AI Tutor VLearn. Bạn đang xem tài liệu "${materialTitle}" (Trang ${currentPage}/${totalPages}). Bạn có thắc mắc gì cần giải đáp không?`
+        : `Tài liệu "${materialTitle}" chưa có học liệu thật trong bản demo này — AI Tutor hiện chỉ ground được vào Day 01 và Day 02. Bạn thử chuyển sang một trong hai tài liệu đó nhé.`
     }
   ]);
   const [notes, setNotes] = useState([
@@ -62,13 +67,23 @@ export function ReaderTabs({
 
     setChatMessages(prev => [...prev, { sender: "user", text: query }]);
     if (!textToSend) setAiPrompt("");
+
+    if (!deck) {
+      setChatMessages(prev => [...prev, {
+        sender: "ai",
+        badge: "⚠️ CHƯA CÓ HỌC LIỆU THẬT",
+        text: "Tài liệu này chưa có corpus thật để AI ground vào trong bản demo — chuyển sang Day 01 hoặc Day 02 để hỏi AI Tutor.",
+      }]);
+      return;
+    }
+
     setIsThinking(true);
 
     try {
       const res = await fetch("/api/tutor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: query, currentPage }),
+        body: JSON.stringify({ question: query, currentPage, deck }),
       });
       const d = await res.json();
 
