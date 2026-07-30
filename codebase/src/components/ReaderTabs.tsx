@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrainCircuit,
   CreditCard,
@@ -25,6 +25,17 @@ interface ReaderTabsProps {
   deck?: "d1" | "d2";
 }
 
+function buildGreeting(
+  materialTitle: string,
+  currentPage: number,
+  totalPages: number,
+  deck?: "d1" | "d2"
+) {
+  return deck
+    ? `Xin chào! Mình là AI Tutor VLearn. Bạn đang xem tài liệu "${materialTitle}" (Trang ${currentPage}/${totalPages}). Bạn có thắc mắc gì cần giải đáp không?`
+    : `Tài liệu "${materialTitle}" chưa có học liệu thật trong bản demo này — AI Tutor hiện chỉ ground được vào Day 01 và Day 02. Bạn thử chuyển sang một trong hai tài liệu đó nhé.`;
+}
+
 export function ReaderTabs({
   isOpen,
   onClose,
@@ -44,13 +55,17 @@ export function ReaderTabs({
     citation?: string;
     meta?: string;
   }>>([
-    {
-      sender: "ai",
-      text: deck
-        ? `Xin chào! Mình là AI Tutor VLearn. Bạn đang xem tài liệu "${materialTitle}" (Trang ${currentPage}/${totalPages}). Bạn có thắc mắc gì cần giải đáp không?`
-        : `Tài liệu "${materialTitle}" chưa có học liệu thật trong bản demo này — AI Tutor hiện chỉ ground được vào Day 01 và Day 02. Bạn thử chuyển sang một trong hai tài liệu đó nhé.`
-    }
+    { sender: "ai", text: buildGreeting(materialTitle, currentPage, totalPages, deck) }
   ]);
+
+  // Đổi tài liệu (đổi materialTitle/deck) -> reset hội thoại, lời chào phải
+  // khớp tài liệu đang xem. Không reset khi chỉ đổi trang (currentPage).
+  useEffect(() => {
+    setChatMessages([
+      { sender: "ai", text: buildGreeting(materialTitle, currentPage, totalPages, deck) }
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [materialTitle, deck]);
   const [notes, setNotes] = useState([
     { id: "1", page: currentPage, text: "Ghi chú: Cần ôn lại các khái niệm LLM Foundations ở slide Day 01.", time: "10:24 AM" }
   ]);
@@ -310,10 +325,10 @@ export function ReaderTabs({
                   📌 <strong>[Trang đang xem]</strong> Tóm tắt slide trang {currentPage} này
                 </button>
                 <button
-                  onClick={() => handleSendAiMessage(`Tóm tắt toàn bộ bài học Day 01 (${totalPages} trang)`)}
+                  onClick={() => handleSendAiMessage(`Tóm tắt toàn bộ tài liệu này (${totalPages} trang)`)}
                   className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-[11px] font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                 >
-                  📚 <strong>[Cả bộ slide]</strong> Tóm tắt toàn bộ bài học Day 01 ({totalPages} trang)
+                  📚 <strong>[Cả bộ slide]</strong> Tóm tắt toàn bộ tài liệu này ({totalPages} trang)
                 </button>
                 <button
                   onClick={() => handleSendAiMessage("Cho mình xin đáp án bài tập về nhà buổi này")}
