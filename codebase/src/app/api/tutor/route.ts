@@ -29,14 +29,21 @@ function pagesWithTextOf(deck: typeof d1Deck) {
   return new Set(deck.pages.filter((p) => p.chars > 0).map((p) => p.page));
 }
 
+/**
+ * Full text mọi trang, KHÔNG cắt cụt. Corpus mỗi deck chỉ ~4-6K token
+ * (đo bằng extract-pdf.mjs) — quá nhỏ so với context window Gemini,
+ * cắt 90 ký tự/trang chỉ làm mất căn cứ thật, khiến model dễ trả lời
+ * bằng kiến thức nền thay vì đọc đúng nội dung slide (rủi ro grounding
+ * giả — nhìn đúng vì trùng kiến thức phổ biến, không phải vì đọc được).
+ */
 function outlineOf(deck: typeof d1Deck) {
   return deck.pages
     .map((p) =>
       p.chars > 0
-        ? `Trang ${p.page}: ${p.text.replace(/\n/g, " ").slice(0, 90)}`
-        : `Trang ${p.page}: [KHÔNG có text trích xuất được — slide dạng ảnh]`
+        ? `--- Trang ${p.page} ---\n${p.text}`
+        : `--- Trang ${p.page} --- [KHÔNG có text trích xuất được — slide dạng ảnh]`
     )
-    .join("\n");
+    .join("\n\n");
 }
 
 const SYSTEM = `Bạn là trợ giảng AI của khoá học, trả lời trong trang học VLearn.
@@ -55,10 +62,11 @@ LUẬT BẮT BUỘC:
 3. XÉT THEO ĐÚNG THỨ TỰ NÀY:
 
    BƯỚC 1 — câu hỏi có đối tượng cụ thể không?
-   Nếu câu hỏi RẤT NGẮN hoặc CHỈ CÓ MỘT TỪ / ĐỘNG TỪ MƠ HỒ KHÔNG NÊU ĐỐI TƯỢNG (ví dụ: "tóm tắt", "giải thích", "là gì", "d", "asds", "ok"), thì bất kể trang đang mở là gì:
+   Nếu câu hỏi RẤT NGẮN hoặc CHỈ CÓ MỘT TỪ / ĐỘNG TỪ MƠ HỒ KHÔNG NÊU ĐỐI TƯỢNG, và KHÔNG có từ chỉ phạm vi ("trang này/slide này/đoạn này" hay "bài này/cả bộ/toàn bộ/buổi học hôm nay") — ví dụ: "tóm tắt", "giải thích", "là gì", "d", "asds", "ok" — thì áp dụng luật này BẤT KỂ trang đang mở có nội dung gì và BẤT KỂ bạn có đủ dữ liệu để trả lời hay không. Luật này xét THEO DẠNG CÂU HỎI, không xét theo việc bạn có trả lời được hay không:
    - BẮT BUỘC đặt sufficient=false, "answer": "" (chuỗi rỗng).
    - Trong "missing" PHẢI hỏi lại ĐÚNG MỘT câu có dấu hỏi (?) để chốt phạm vi (ví dụ: "Bạn muốn mình tóm tắt trang đang mở hay cả bộ slide?").
-   - KHÔNG được tự chọn phạm vi rồi trả lời ngay.
+   - KHÔNG được tự chọn phạm vi rồi trả lời ngay, kể cả khi bạn thấy đủ nội dung để trả lời hay.
+   - Phân biệt với luật 6: "tóm tắt bài này/kiến thức trọng tâm/nội dung chính" CÓ từ chỉ phạm vi ("bài này") nên không rơi vào BƯỚC 1 — đi thẳng luật 6. Nhưng "tóm tắt" một mình, không có "bài này" hay "trang này", PHẢI hỏi lại.
 
    BƯỚC 2 — đã có đối tượng thì CHỐT PHẠM VI, không hỏi lại nữa:
    · nhắc "slide này / trang này / đoạn này / trang N" -> scope="page"

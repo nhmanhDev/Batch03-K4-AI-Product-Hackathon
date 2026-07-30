@@ -1,96 +1,94 @@
-# Mini Hackathon AI — Batch 03
+# AI Thực Chiến: Venture Arena — Nhóm AI42E · Zone D304
 
-**SPEC → Prototype → Demo.** Đây không phải cuộc thi code — đây là cuộc thi **tư duy sản phẩm AI**.
+**Hướng A — VLearn · tối ưu AI tutor có sẵn**
 
-- Thời lượng: **1,5 ngày** (một ngày build + một buổi demo)
-- Nhóm: **4-5 người** · zone tối đa 5 nhóm · thi theo lớp
+> **Lát cắt:** Học viên trong buổi học hỏi một câu về học liệu của buổi → AI quyết định nó có căn cứ ở phạm vi nào (trang đang mở / cả bộ slide) và có đủ để trả lời hay không → trả về câu trả lời kèm trích dẫn đúng phạm vi đó, hoặc nói rõ thiếu gì và chỉ sang chỗ có, không đòi học viên tự cung cấp nội dung.
 
-## Bắt đầu từ đâu?
+Chi tiết bài toán, bằng chứng và bảng impact: **[cp1/canvas.md](cp1/canvas.md)** · **[cp1/impact-table.md](cp1/impact-table.md)**
 
-1. Đọc **`01-de-bai.md`** để chọn hướng và hiểu tiêu chí.
-2. Mở **`02-guide.md`** — hướng dẫn từng giai đoạn, đứng ở đâu đọc mục đó.
-3. Viết spec theo **`03-template-ai-spec.md`** — deliverable trung tâm của cả sự kiện.
-4. Đọc **`04-rubric.md`** ngay từ đầu — biết trước bài được chấm theo tiêu chí nào.
+## Thành viên & phân công
 
-| File / thư mục | Nội dung |
-|---|---|
-| `01-de-bai.md` | Đề bài 3 hướng · 5 tiêu chí nghiệm thu · ràng buộc chung |
-| `02-guide.md` | Hướng dẫn 5 giai đoạn: khám phá → spec → build → đo & validate → demo |
-| `03-template-ai-spec.md` | Template AI Spec (nộp 23:59 ngày 1) |
-| `04-rubric.md` | Rubric 100 điểm (25 nộp checkpoint + 75 chấm bài) + checklist xác minh 6 mốc |
-| `data/` | Dữ liệu thật đã ẩn danh: chatlog VLearn tutor + 6 transcript bài giảng + 2 bộ slide bản hackathon — dùng để tìm bằng chứng và xây golden set |
-| `tham-khao/` | JTBD Playbook (PDF) + worksheet JTBD đầy đủ — đọc khi muốn đào sâu |
+Leader: **Nguyễn Hùng Mạnh** — `2A202601256`
 
-## Lịch — 6 mốc
+Bốn luồng chạy song song theo [02-guide.md](02-guide.md) §3.5.
 
-| Mốc | Khoá 3 | Khoá 4 |
-|---|---|---|
-| Khai mạc + phát đề | 09:00 ngày 1 | 14:00 ngày 1 |
-| CP1 · Chốt Canvas | 10:00 ngày 1 | 15:00 ngày 1 |
-| CP2 · Show được thứ bấm được | 12:00 ngày 1 | 17:00 ngày 1 |
-| CP3 · AI chạy thật + đo lượt đầu | 16:00 ngày 1 | 10:30 ngày 2 |
-| CP4 · Chốt tiến độ — spec nộp hạn cứng **23:59 ngày 1** | 17:30 ngày 1 | 12:00 ngày 2 |
-| CP5 · Xác minh + validation + dry run | 09:00 ngày 2 | 14:00 ngày 2 |
-| CP6 · Demo | 10:00 ngày 2 | 15:00 ngày 2 |
+| Mã HV | Tên | Luồng | Phần phụ trách | Artifact có tên |
+|---|---|---|---|---|
+| `2A202601256` | Nguyễn Hùng Mạnh | spec + validation | AI Spec 8 mục theo `03-template-ai-spec.md` · hẹn trước willing users, chủ trì vòng validation | `spec.md` · `validation/` |
+| `2A202601102` | Nguyễn Văn Trọng | prompt + golden set | Prompt ở quyết định trung tâm · golden set ≥20 case · vòng lặp `chạy trọn bộ → % → sửa 1 failure → chạy lại` | `eval/` · phần prompt trong `codebase/` |
+| `2A202601194` | Nguyễn Tuấn Hùng | evidence | Vòng hỏi 10 người · giữ `verify.py` và mọi con số mining · **người thứ 2 của build flow sau CP2** | `cp1/` · `spec.md` §1-§2 |
+| `2A202601568` | Trần Trọng Thịnh | build flow | Flow chính bấm đi hết được, không can thiệp tay · lời gọi AI thật · demo CP6 | `codebase/` · `demo-slides.pdf` |
 
-Mỗi mốc cần show gì và được xác minh thế nào: xem bảng trong `04-rubric.md`.
+**Vibe-coding rule:** mỗi người phải giải thích được phần có tên mình — TA hỏi ngẫu nhiên **một** người tại CP5, không giải thích được thì phần cá nhân liên quan 0 điểm ([04-rubric.md](04-rubric.md) mục Reflection).
 
-## Nộp bài
+**Giao diện giữa các luồng** — chỗ dễ tắc nhất, chốt trước:
 
-Một repo nhóm, cấu trúc như sau. Spec chốt lúc 23:59 ngày 1; bản hoàn chỉnh trước CP6.
+| Từ | Sang | Bàn giao cái gì | Trước mốc |
+|---|---|---|---|
+| Mạnh | Trọng | 4 lớp chỗ khó (①②③④) + ≥8 kịch bản trong `spec.md` §5-§6 → đây là xương của golden set | CP3 |
+| Mạnh | Trọng | Định nghĩa từng chiều chất lượng + quality bar bằng số | 23:59 N1 (chốt, không đổi sau) |
+| Thịnh | Trọng | Điểm cắm prompt trong code + cách chạy 1 case ngoài UI | CP2 |
+| Tuấn Hùng | Trọng | Case lấy từ chatlog: mã turn + trang + `day_code` | CP3 |
+| Tuấn Hùng | Mạnh | 3 dòng tổng hợp vòng hỏi 10 người → ô hậu quả trong `spec.md` §1 | trước 23:59 N1 |
+| Trọng | Mạnh | Bảng kết quả có % để đối chiếu quality bar | CP3 |
 
-```
-repo/
-├── README.md          ← thành viên (mã HV + tên) + phân công có tên từng phần
-├── spec.md            ← AI Spec theo 03-template-ai-spec.md
-├── demo-slides.pdf    ← slide 6 trang theo 02-guide.md §5.1
-├── codebase/          ← prototype (ghi rõ phần nào mock)
-├── eval/              ← golden set + bảng kết quả các lượt chạy
-├── validation/        ← feedback log từ vòng user test
-└── reflection/        ← mỗi người 1 file
+## Bằng chứng — chạy lại được
+
+```bash
+python cp1/scripts/verify.py
 ```
 
-## Chấm điểm
+Một lệnh in ra mọi con số được trích trong canvas và bảng impact. Chỉ dùng thư viện chuẩn của Python 3.7+, không cần cài gì. Map từng con số về chỗ nó được trích: [cp1/scripts/README.md](cp1/scripts/README.md).
 
-Tổng **100 điểm = 25 điểm nộp checkpoint + 75 điểm chấm bài nộp**. Chi tiết từng ý điểm: `04-rubric.md`.
+Số chính, mining **1.261 lượt hỏi-đáp thật** (369 user, 585 hội thoại, 22–29/07/2026):
 
-**25 điểm nộp — mỗi checkpoint 5 điểm (CP1-CP5):** nộp đúng hạn → 5 điểm · nộp muộn → 0 điểm cho mốc đó. Mỗi thành viên nộp riêng, cả nhóm dùng chung một link repo.
+- Đường **gõ câu hỏi tự do** hỏng **21,1%** (160/757) so với **2,0%** (10/495) khi có **bôi đen** — chênh 10 lần, và độ dài đoạn bôi đen không phải biến giải thích
+- **62,5%** câu hỏi bị từ chối không bao giờ được trả lời · **49%** là câu hỏi cuối cùng học viên hỏi trong ngày
+- Nhóm lỗi này **15/15 lượt được rate đều là 👎**, không một lượt 👍
+- Đã loại trừ giả thuyết "do slide là ảnh" từ hai phía: 55% ca thất bại nằm trên trang đã chứng minh có text, và cả 58 trang slide trong pack đều extract được text
 
-**75 điểm chấm — trên artifact trong repo, mỗi con điểm trỏ về một file:**
+Giới hạn bằng chứng ghi nhận trung thực — gồm cả 2 giả thuyết đã kiểm và **không** đứng vững: [cp1/impact-table.md](cp1/impact-table.md) mục "Giới hạn bằng chứng".
 
-| Khối | Điểm | Chấm trên file nào |
+## Chạy prototype
+
+```bash
+cd codebase
+npm install
+npm run dev
+```
+
+Mở `http://localhost:3000`. Cần `codebase/.env.local` với `GEMINI_API_KEY` để gọi AI thật ở quyết định trung tâm. Flow chi tiết + phần nào thật/mock: [codebase/README.md](codebase/README.md).
+
+## Tiến độ theo checkpoint
+
+| Đường dẫn | Nội dung | Trạng thái |
 |---|---|---|
-| R1 · Bằng chứng & impact | 15 | `spec.md` §1-§2 + log khảo sát/mining |
-| R2 · Lát cắt & thiết kế | 15 | `spec.md` §4 |
-| R3 · Chỗ khó & kịch bản rủi ro | 11 | `spec.md` §5-§6 |
-| R4 · Kiểm thử | 15 | `spec.md` §7 + `eval/` |
-| R5 · Prototype chạy được | 8 | `codebase/` + demo |
-| R6 · Validation với user | 8 | `validation/` |
-| R7 · Quy trình & repo | 3 | cấu trúc repo |
+| `cp1/` | Canvas CP1 · bảng impact · kịch bản khảo sát · script đếm | ✅ CP1 |
+| `codebase/` | Prototype mock — flow chính bấm đi hết được | ✅ CP2 |
+| `eval/` | Golden set ≥20 case + bảng kết quả các lượt chạy | ✅ CP3 |
+| `spec.md` | AI Spec theo `03-template-ai-spec.md` | ⬜ **hạn cứng 23:59 N1** |
+| `validation/` | Feedback log ≥5 mẩu từ ≥5 người ngoài nhóm | ⬜ CP5 |
+| `demo-slides.pdf` | Slide 6 trang theo `02-guide.md` §5.1 | ⬜ CP6 |
+| `reflection/` | Mỗi người 1 file | ⬜ CP6 |
 
-Ba điều nên biết trước khi làm:
+Lịch 6 mốc (khoá 4) và checklist TA xác minh từng mốc: [04-rubric.md](04-rubric.md) Phần 3.
 
-- Điểm dựa trên **chuỗi quyết định và bằng chứng**, không dựa trên mức độ hoành tráng của sản phẩm.
-- Kết quả đo **ghi nhận trung thực** — kể cả khi không đạt mục tiêu nhóm tự đặt — vẫn được tính đủ điểm. Số liệu bị chỉnh sửa hoặc che giấu sẽ không được tính.
-- Reflection cá nhân chấm riêng theo rubric của khoá. Điểm vòng demo, chấm chéo trong zone và thưởng thêm (nếu có) theo thể lệ công bố lúc khai mạc.
-
-## Luật chung
-
-1. Prototype có 3 mức **Sketch / Mock / Working** — mức nào cũng bắt buộc **≥1 lời gọi AI chạy thật**.
-2. **Vibe-coding rule:** dùng AI để build thoải mái, nhưng không giải thích được phần có tên mình thì phần đó 0 điểm (kiểm tra tại CP5).
-3. **Quality bar** chốt tại spec.md 23:59 ngày 1 và giữ nguyên sau đó.
-4. Chỉ dùng dữ liệu trong `data/` hoặc dữ liệu giả tự sinh — không dùng dữ liệu thật của người thật. Không commit API key.
-5. Tuân thủ **quy định bảo mật dữ liệu** bên dưới — đây là điều kiện để được cấp data.
+Tài liệu ban tổ chức giữ nguyên trong repo: [01-de-bai.md](01-de-bai.md) · [02-guide.md](02-guide.md) · [03-template-ai-spec.md](03-template-ai-spec.md) · [04-rubric.md](04-rubric.md)
 
 ## Bảo mật dữ liệu được cung cấp
 
 Dữ liệu trong `data/` là dữ liệu thật của khoá học (đã ẩn danh), cấp riêng cho hackathon này. Khi nhận data, nhóm cam kết:
 
-1. **Chỉ dùng trong phạm vi hackathon** — cho việc tìm bằng chứng, xây golden set và build prototype. Không dùng cho mục đích khác.
-2. **Không chia sẻ ra ngoài khoá học** — không đăng lên mạng xã hội, không gửi cho người ngoài, không đưa vào bất kỳ dataset hay repo công khai nào.
-3. **Không commit data pack vào repo nộp bài** — repo nhóm chỉ chứa trích dẫn ngắn để minh hoạ (vài dòng); golden set trích từ data ghi rõ mã đoạn/mã hội thoại thay vì dán nguyên văn dài.
-4. **Cẩn trọng khi đưa data vào công cụ ngoài** — chỉ đưa phần tối thiểu cần cho việc đang làm; lưu ý API/công cụ free tier có thể dùng dữ liệu để huấn luyện (xem `02-guide.md` §3.4).
-5. **Không cố suy ngược danh tính** từ dữ liệu đã ẩn danh ([học viên], mã U/C/T/M).
+1. **Chỉ dùng trong phạm vi hackathon** — tìm bằng chứng, xây golden set, build prototype. Không dùng cho mục đích khác.
+2. **Không chia sẻ ra ngoài khoá học** — không đăng mạng xã hội, không gửi người ngoài, không đưa vào dataset hay repo công khai nào.
+3. **Không commit data pack vào repo nộp bài** — chỉ trích dẫn ngắn để minh hoạ; golden set ghi mã đoạn/mã hội thoại thay vì dán nguyên văn dài.
+4. **Cẩn trọng khi đưa data vào công cụ ngoài** — chỉ phần tối thiểu cần thiết; free tier có thể dùng dữ liệu để huấn luyện (xem [02-guide.md](02-guide.md) §3.4).
+5. **Không cố suy ngược danh tính** từ dữ liệu đã ẩn danh (`[học viên]`, mã `U`/`C`/`T`/`M`).
 6. Sau sự kiện, **xoá các bản sao data pack** khỏi máy cá nhân và các công cụ đã upload nếu ban tổ chức yêu cầu.
 
-Vi phạm được xử lý theo quy định của khoá và có thể ảnh hưởng trực tiếp đến điểm của nhóm.
+Không commit API key. Key chỉ đọc trong **server route** qua `process.env` — không đặt tên `NEXT_PUBLIC_*` cho key vì biến đó đi vào bundle JS công khai. `.gitignore` đã bắt `.env`, `.env.local` và mọi biến thể.
+
+## Ghi nhận
+
+Codebase khởi tạo từ template [ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template) — MIT, JCodesMore.
+

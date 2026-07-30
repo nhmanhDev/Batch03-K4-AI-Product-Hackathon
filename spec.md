@@ -152,22 +152,23 @@ Các mục curriculum 5 ngày trong sidebar, mindmap, flashcard và ghi chú là
 
 ### Kết quả các lượt chạy hiện có
 
-| Lượt | Kết quả | Đối chiếu bar |
-|---|---:|---|
-| 01 | 20/20 (100%) | Đạt |
-| 02 | 19/20 (95%) | Đạt |
-| 03 | 17/20 (85%) | Đạt |
-| 04 | 19/20 (95%) | Đạt |
-| 05 | 20/20 (100%) | Đạt |
-| 06 | 20/20 (100%) | Đạt |
-| 07 | 17/20 (85%) | Đạt |
-| 08 | 19/20 (95%) | Đạt |
+| Lượt | Kết quả | Đối chiếu bar | Ghi chú |
+|---|---:|---|---|
+| 01 | 20/20 (100%) | Đạt | Corpus cũ (`day01-slide-blue-v0.pdf`, 23 trang, không thuộc pack chính thức) |
+| 02 | 19/20 (95%) | Đạt | " |
+| 03 | 17/20 (85%) | Đạt | " |
+| 04 | 19/20 (95%) | Đạt | " |
+| 05 | 20/20 (100%) | Đạt | " |
+| 06 | 20/20 (100%) | Đạt | " |
+| 07 | 17/20 (85%) | Đạt | Chuyển sang corpus đúng pack (`d1-slide-hackathon.pdf`, 29 trang); C12/C13 lệch vì trang không còn khớp nội dung |
+| 08 | 19/20 (95%) | Đạt | Sửa C12/C13 theo trang thật; `C02` chưa đạt — hệ thống dùng `deck` thay vì dừng ở phạm vi trang 21 |
+| 09 | 19/20 (95%) | Đạt | Regression sau khi wire deck Day 2 vào UI + sửa route đọc `body.deck` — không đổi số |
+| 10 | 19/20 (95%) | Đạt | Sửa nguyên nhân gốc `C02`: outline "cả bộ" trước đây cắt cụt 90 ký tự/trang → model dễ trả lời bằng kiến thức nền thay vì đọc đúng nội dung. Đổi sang full text (~4-6K token/deck, dư sức trong context) → `C02` **đạt**. Nhưng `C03` (câu hỏi mơ hồ "tóm tắt") mới lộ ra: có đủ ngữ cảnh hơn khiến model tự tin trả lời thay vì hỏi lại |
+| 11 | 19/20 (95%) | Đạt | Củng cố lại luật BƯỚC 1 trong prompt (nêu rõ áp dụng bất kể có đủ dữ liệu trả lời hay không) — `C03` vẫn chưa đạt. Dừng tinh chỉnh tại đây |
 
-Ở lượt 08, `C02` chưa đạt: hệ thống dùng `deck` và coi là đủ căn cứ cho câu hỏi cần được xử lý trong phạm vi trang 21.
+**Phân tích `C03` (lượt 10-11, chưa đạt):** câu hỏi chỉ có một chữ "tóm tắt" (lớp ②, không có từ chỉ phạm vi) — kỳ vọng `sufficient=false` + hỏi lại đúng một câu. Model trả lời `sufficient=true` kèm bản tóm tắt đầy đủ cả bộ, dù luật BƯỚC 1 nêu rõ *"bất kể bạn có đủ dữ liệu để trả lời hay không"*. Đây là giới hạn thật của model khi có full-text context: nó ưu tiên "trả lời tốt vì có thể" hơn "tuân luật hỏi lại theo dạng câu hỏi". Không hardcode chặn cứng ở server (khác 2 điều kiện cứng của quality bar) vì phát hiện "câu hỏi có mơ hồ không" là heuristic khó chặn đáng tin bằng regex như citation/demand-content — giữ làm case chưa đạt, không hạ chuẩn hay ép qua.
 
 > ⚠️ **CHƯA ĐỦ THÔNG TIN:** Chưa có bằng chứng hai thành viên chấm độc lập cùng năm output khó rồi đối chiếu theo định nghĩa chất lượng. Đây là bước cần bổ sung để xác nhận tiêu chí pass/fail không mơ hồ.
-
-> 🔎 **CẦN XÁC NHẬN LẠI:** Chạy lại toàn bộ golden set trên đúng cấu hình sẽ demo sau khi sửa `C02` hoặc thay prompt/model; không thay đổi quality bar 85% và hai điều kiện cứng.
 
 ## §8. Phân công & kế hoạch
 
