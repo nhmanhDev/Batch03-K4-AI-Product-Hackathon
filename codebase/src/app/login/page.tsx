@@ -9,8 +9,8 @@ import { BrandMark } from "@/components/BrandMark";
  * Tài khoản seed cố định, chỉ để màn hình demo trông đúng luồng thật khi
  * trình bày với mentor/giám khảo. Không có backend auth, không gọi ra ngoài.
  */
-const DEMO_EMAIL = "test123";
-const DEMO_PASSWORD = "test123";
+const DEMO_EMAIL = "nhmanhDev";
+const DEMO_PASSWORD = "ai42e";
 
 export default function LoginPage() {
   const router = useRouter();
