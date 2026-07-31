@@ -9,9 +9,15 @@ import { BrandMark } from "@/components/BrandMark";
  * Tài khoản seed cố định, chỉ để màn hình demo trông đúng luồng thật khi
  * trình bày với mentor/giám khảo. Không có backend auth, không gọi ra ngoài.
  */
-// Bốn tài khoản seed cho 4 thành viên nhóm, dùng chung một mật khẩu demo.
-const DEMO_ACCOUNTS = ["nhmanhDev", "trongnv", "hungnt", "thinhtt"];
+const DEMO_ACCOUNT = "nhmanhDev";
 const DEMO_PASSWORD = "ai42e";
+
+/**
+ * Đổi tên cookie sang _v2: trình duyệt nào còn giữ cookie phiên bản cũ
+ * (`vlearn_demo_session`) sẽ mất quyền truy cập và phải đăng nhập lại — đúng ý
+ * khi thu gọn danh sách tài khoản, tránh phiên cũ của tài khoản đã bỏ vẫn vào được.
+ */
+export const SESSION_COOKIE = "vlearn_demo_session_v2";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,14 +30,15 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const account = email.trim().toLowerCase();
-    if (!DEMO_ACCOUNTS.some((a) => a.toLowerCase() === account) || password !== DEMO_PASSWORD) {
+    if (email.trim().toLowerCase() !== DEMO_ACCOUNT.toLowerCase() || password !== DEMO_PASSWORD) {
       setError("Sai email hoặc mật khẩu.");
       return;
     }
 
     setIsSubmitting(true);
-    document.cookie = "vlearn_demo_session=1; path=/; max-age=86400";
+    // Xoá cookie phiên bản cũ để trình duyệt không giữ lại phiên đã hết hiệu lực.
+    document.cookie = "vlearn_demo_session=; path=/; max-age=0";
+    document.cookie = `${SESSION_COOKIE}=1; path=/; max-age=86400`;
     router.push("/dashboard");
   };
 
@@ -63,7 +70,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#155493] focus:ring-1 focus:ring-[#155493] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-              placeholder={DEMO_ACCOUNTS[0]}
+              placeholder={DEMO_ACCOUNT}
             />
           </div>
           <div>

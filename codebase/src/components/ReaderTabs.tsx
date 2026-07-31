@@ -186,6 +186,34 @@ export function ReaderTabs({
   };
   const [newNoteText, setNewNoteText] = useState("");
 
+  // ---- Gửi qua Telegram: AI chỉ soạn nháp, học viên xác nhận mới gửi ----
+  const [teleDraft, setTeleDraft] = useState<{ text: string; source: string } | null>(null);
+  const [teleState, setTeleState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [teleError, setTeleError] = useState("");
+
+  const sendTelegram = async () => {
+    if (!teleDraft || teleState === "sending") return;
+    setTeleState("sending");
+    setTeleError("");
+    try {
+      const res = await fetch("/api/telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(teleDraft),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Không gửi được.");
+      setTeleState("sent");
+      setTimeout(() => {
+        setTeleDraft(null);
+        setTeleState("idle");
+      }, 1400);
+    } catch (e) {
+      setTeleState("error");
+      setTeleError((e as Error).message);
+    }
+  };
+
   // ---- Flashcard sinh thật từ /api/flashcards ----
   type Card = { front: string; options: string[]; correctIndex: number; back: string; page: number };
   const [cards, setCards] = useState<Card[] | null>(null);
@@ -635,6 +663,22 @@ export function ReaderTabs({
                           {msg.meta}
                         </div>
                       )}
+                      {/* Chỉ câu trả lời của AI mới có nút gửi. AI KHÔNG tự gửi —
+                          bấm vào đây chỉ mở hộp xác nhận, học viên đọc rồi mới chốt. */}
+                      {msg.sender === "ai" && msg.citation && (
+                        <button
+                          onClick={() =>
+                            setTeleDraft({
+                              text: msg.text,
+                              source: `${materialTitle}${msg.citation ? ` · ${msg.citation}` : ""}`,
+                            })
+                          }
+                          className="mt-2 flex items-center gap-1 text-[10px] font-bold text-slate-400 transition-colors hover:text-[#124f8c] dark:hover:text-sky-400"
+                        >
+                          <Send className="h-3 w-3" />
+                          Gửi qua Telegram
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1005,6 +1049,76 @@ export function ReaderTabs({
         )}
       </div>
       </div>
+
+      {/* Hộp xác nhận gửi Telegram — hiện NGUYÊN VĂN nội dung sắp gửi để học
+          viên đọc trước. AI không có đường nào tự bấm nút này. */}
+      {teleDraft && (
+        <div
+          className="absolute inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-[2px]"
+          onClick={() => teleState !== "sending" && setTeleDraft(null)}
+        >
+          <div
+            className="w-full rounded-t-2xl border-t border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-[#124f8c] dark:bg-sky-950 dark:text-sky-300">
+                <Send className="h-3.5 w-3.5" />
+              </span>
+              <p className="text-xs font-extrabold text-slate-900 dark:text-white">
+                Gửi nội dung này qua Telegram?
+              </p>
+            </div>
+
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              {teleDraft.source}
+            </p>
+            <p className="mb-3 max-h-32 overflow-y-auto whitespace-pre-wrap rounded-xl bg-slate-50 p-2.5 text-[11px] leading-relaxed text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              {teleDraft.text}
+            </p>
+
+            {teleState === "error" && (
+              <p className="mb-2 rounded-lg bg-red-50 p-2 text-[11px] font-medium text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                {teleError}
+              </p>
+            )}
+
+            {teleState === "sent" ? (
+              <p className="flex items-center gap-1.5 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <Check className="h-4 w-4" />
+                Đã gửi
+              </p>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={sendTelegram}
+                  disabled={teleState === "sending"}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#124f8c] px-3 py-2 text-xs font-bold text-white hover:bg-[#0b355f] disabled:opacity-60 dark:bg-sky-500 dark:text-slate-950"
+                >
+                  {teleState === "sending" ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Đang gửi…
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-3.5 w-3.5" />
+                      Đồng ý gửi
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setTeleDraft(null)}
+                  disabled={teleState === "sending"}
+                  className="rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
+                >
+                  Huỷ
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
