@@ -130,7 +130,21 @@ Tự nêu trước thì đây là điểm cộng về tính trung thực. Để 
 
 ## Dry run
 
-Mốc thời gian mục tiêu theo guide §5.1: slide 1 (45″) · slide 2 (45″) · **slide 3 + demo live (2′)** · slide 4 (45″) · slide 5 (45″) · slide 6 (30″).
+### ⚠️ Phát hiện khi cộng lại: ngân sách của guide vượt 30 giây
+
+Mốc thời gian guide §5.1 đưa ra: slide 1 (45″) · slide 2 (45″) · **slide 3 + demo live (2′)** · slide 4 (45″) · slide 5 (45″) · slide 6 (30″).
+
+```
+45 + 45 + 120 + 45 + 45 + 30 = 330 giây = 5:30
+Vòng demo chỉ cho                        5:00
+                              => VƯỢT      30 giây
+```
+
+Bám đúng từng mốc của guide thì **vẫn quá giờ**. Phải chủ động cắt 30 giây, và chỗ cắt rẻ nhất đã có sẵn: **bỏ nhịp 3 (kế hoạch + Telegram, ~40 giây)**.
+
+Nhịp 3 không phục vụ lát cắt đã khai — lát cắt là *quyết định phạm vi căn cứ*, còn kế hoạch học tập là định dạng đầu ra phụ. Guide §5.1 chỉ đòi **1 case chuẩn + 1 case chỗ khó**, tức nhịp 1 và nhịp 2 là đủ.
+
+**Mặc định: chạy nhịp 1 + 2, bỏ nhịp 3.** Chỉ thêm nhịp 3 nếu đến slide 3 mà còn dư thời gian thật.
 
 ### Phần máy — ĐÃ ĐO THẬT trên bản deploy (31/07)
 
@@ -148,6 +162,20 @@ Chạy trọn chuỗi thao tác demo trên `minihackathon.ai42e.com`, đăng nh�
 **Ý nghĩa cho việc chia thời gian:** trong 2 phút của slide 3, máy chỉ chiếm **8 giây**. 112 giây còn lại là **người nói và thao tác chuột**. Nghĩa là không được im lặng chờ — mỗi nhịp chỉ có 1-3 giây trống, vừa đủ một câu nói đã chuẩn bị sẵn (xem phần "Nói trong lúc chờ" ở trên). Nếu bỏ nhịp 3 thì máy chỉ chiếm ~3 giây.
 
 **Cảnh báo đã kiểm chứng:** con số trên là khi **đã ấm máy**. Lần gọi đầu sau khi Vercel ngủ mất **6,8 giây** — gần bằng cả ba nhịp cộng lại. Bắt buộc gọi thử một câu trước khi lên.
+
+### Kiểm lại lần cuối trên bản deploy — 31/07, ngay trước CP6
+
+Chạy lại toàn bộ chuỗi trên `minihackathon.ai42e.com`, đăng nhập thật, đọc độ trễ do chính server báo về:
+
+| Nhịp | Gõ gì | Kết quả hiện ra | Độ trễ |
+|---|---|---|---|
+| 2 | `MCP là gì` | `⚠️ NGỮ CẢNH: NGOÀI PHẠM VI HỌC LIỆU` + `[Không tìm thấy trích dẫn hợp lệ]` | **917 ms** |
+| 1 (bản thay thế) | `tóm tắt trang 12` | `📌 NGỮ CẢNH: TRANG 12 / 20` | **1.035 ms** |
+| 3 | `lập kế hoạch ôn tập 3 ngày gửi tele` | `📚 NGỮ CẢNH: CẢ BỘ SLIDE (20 TRANG)` → thẻ `🗓️ KẾ HOẠCH 3 BUỔI · 155 PHÚT`, mỗi buổi có số trang thật | **1.161 ms** + **2.044 ms** |
+
+Cả ba nhịp đều đúng hành vi mong đợi. Ảnh nhịp 2 lưu ở [`demo-backup/02-ngoai-pham-vi-tu-choi.png`](demo-backup/02-ngoai-pham-vi-tu-choi.png).
+
+**Ranh giới an toàn vẫn giữ đúng:** ở nhịp 3, AI tự viết *"bạn hãy xem lại và tự bấm nút gửi đi nhé"* — **không tự gửi Telegram**, đúng nguyên tắc trong `codebase/src/app/api/telegram/route.ts`.
 
 ### Phần người — CẦN LÀM, không ai đo hộ được
 
