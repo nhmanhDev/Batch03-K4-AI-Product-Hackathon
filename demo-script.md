@@ -73,6 +73,27 @@ Bấm **"Gửi kế hoạch qua Telegram"** → hộp xác nhận hiện nguyên
 
 ---
 
+## ⚠️ Slide 4 in sai số — nói thế nào cho đúng
+
+Slide export trước lượt chạy cuối nên **trang 4 in số của `run-06`**. File PDF không sửa được (font subset trên trang đó không có glyph chữ số `9`), đã ghi đính chính ở [README.md](README.md) và bảng dưới.
+
+**Khi chiếu tới trang 4, chủ động nói trước khi giám khảo kịp hỏi:**
+
+> *"Slide này em export trước lượt đo cuối nên đang in số của lượt 6. Số dùng để chấm nằm trong `eval/run-18.md`: **19 trên 20, tức 95%** — vẫn vượt quality bar 85% nhóm chốt từ 23:59 ngày 1. Case chưa đạt là **C03**, không phải C02; C02 đã pass từ lượt 10. Đính chính đầy đủ ở README."*
+
+| Slide in | Đọc thành |
+|---|---|
+| `20/20 — 100%` | **19/20 — 95%** |
+| `Run-06` | **Run-18** |
+| `Failure Case C02` | **C03** |
+| `1.127 ms` | **1.258 ms** |
+
+Hai dòng **giữ nguyên vì vẫn đúng**: `0 bịa citation` · `0 lần bắt học viên gửi lại nội dung`.
+
+Tự nêu trước thì đây là điểm cộng về tính trung thực. Để giám khảo mở `eval/` ra bắt được thì thành điểm trừ.
+
+---
+
 ## Khi hỏng giữa chừng — xử lý thế nào
 
 **AI trả lỗi mạng / timeout:** đừng bấm lại liên tục (rate limit 40 lần/phút, bấm loạn sẽ bị chặn tiếp). Nói thẳng: *"Đang lỗi mạng hội trường, em cho xem ảnh chụp kết quả đã đo trước"* → chuyển sang ảnh dự phòng. Giám khảo trừ điểm vì lúng túng, không trừ vì mạng.

@@ -70,10 +70,27 @@ Mở `http://localhost:3000`. Cần `codebase/.env.local` với `GEMINI_API_KEY`
 | `validation/` | Feedback log 6 người ngoài nhóm + 4 dòng tổng hợp | ✅ CP5 |
 | `demo-script.md` | Kịch bản 5 phút, mọi câu đã test trên bản deploy | ✅ CP5 |
 | `demo-backup/` | Ảnh dự phòng chụp từ bản deploy khi live hỏng | ✅ CP6 |
-| `demo-slides.pdf` | Slide 6 trang theo `02-guide.md` §5.1 | ✅ CP6 |
+| `demo-slides.pdf` | Slide 6 trang theo `02-guide.md` §5.1 | ✅ CP6 — ⚠️ **trang 4 in số của lượt chạy cũ, xem đính chính ngay dưới** |
 | `reflection/` | Mỗi người 1 file — **khung đã có, nội dung mỗi người tự viết** | ⬜ CP6 |
 
 Lịch 6 mốc (khoá 4) và checklist TA xác minh từng mốc: [04-rubric.md](04-rubric.md) Phần 3.
+
+> ### ⚠️ Đính chính `demo-slides.pdf` trang 4 — số đúng lấy ở `eval/run-18.md`
+>
+> Slide được export **trước lượt chạy cuối** nên trang 4 in kết quả của `eval/run-06.md`. Nhóm **không sửa lại file PDF** (font nhúng dạng subset trên trang đó không chứa glyph chữ số `9`, vá vào sẽ hỏng file) mà ghi đính chính ở đây. Con số dùng để chấm là con số trong `eval/`, không phải trên slide.
+>
+> | Slide trang 4 in | Số đúng — [`eval/run-18.md`](eval/run-18.md) |
+> |---|---|
+> | `20/20 case đạt — 100%` | **19/20 = 95%** |
+> | `Kết quả Run-06` | **Run-18** (lượt mới nhất) |
+> | `Failure Case C02` | **`C03`** — C02 đã pass từ run-10 |
+> | `Median latency: 1.127 ms` | **1.258 ms** |
+>
+> **Không đổi, vì vẫn đúng:** 0 trường hợp bịa trích dẫn · 0 lần đẩy việc tra cứu về học viên — run-18 giữ nguyên 0 vi phạm ở cả hai điều kiện cứng.
+>
+> **95% vẫn vượt quality bar ≥85%** đã chốt lúc 23:59 N1 và không đổi từ đó. Phân tích vì sao `C03` chưa đạt: [`spec.md`](spec.md) §7.
+>
+> Lưu ý khi đối chiếu: 95% đo trên deck `d1-slide-hackathon.pdf` (29 trang), **không phải** deck `ChatbotAI - Law.pdf` đang dùng để demo.
 
 Tài liệu ban tổ chức giữ nguyên trong repo: [01-de-bai.md](01-de-bai.md) · [02-guide.md](02-guide.md) · [03-template-ai-spec.md](03-template-ai-spec.md) · [04-rubric.md](04-rubric.md)
 
