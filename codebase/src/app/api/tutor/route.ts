@@ -53,6 +53,13 @@ const MODELS = {
 type Scope = "page" | "deck" | "out_of_scope";
 
 type TutorDecision = {
+  /**
+   * Học viên đang muốn gì. "answer" = hỏi đáp thường. "study_plan" = xin lập
+   * kế hoạch học/ôn tập — client sẽ gọi tiếp /api/study-plan rồi hiện kế hoạch
+   * ngay trong hội thoại. Vẫn là MỘT quyết định AI: route này quyết định phạm
+   * vi + độ đủ căn cứ + dạng việc học viên cần, chưa hề tự thực hiện gì.
+   */
+  intent?: "answer" | "study_plan";
   scope: Scope;
   /**
    * Với scope="page": trang mà câu trả lời NÓI VỀ. Thường là trang đang mở,

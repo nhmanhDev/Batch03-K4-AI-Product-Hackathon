@@ -35,19 +35,19 @@ export default function WelcomePage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <Link href="/welcome" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d6222f] font-black text-white shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#155493] font-black text-white shadow-sm">
               <span className="text-xl">V</span>
             </div>
             <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-              <span className="text-[#d6222f] dark:text-red-400">V</span>Learn
+              <span className="text-[#155493] dark:text-sky-400">V</span>Learn
             </span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex dark:text-slate-300">
-            <a href="#vision" className="transition-colors hover:text-[#d6222f] dark:hover:text-red-400">Tầm nhìn</a>
-            <a href="#daily-loop" className="transition-colors hover:text-[#d6222f] dark:hover:text-red-400">Cách học</a>
-            <a href="#features" className="transition-colors hover:text-[#d6222f] dark:hover:text-red-400">Tính năng</a>
-            <a href="#for-instructors" className="transition-colors hover:text-[#d6222f] dark:hover:text-red-400">Giảng viên</a>
+            <a href="#vision" className="transition-colors hover:text-[#155493] dark:hover:text-sky-400">Tầm nhìn</a>
+            <a href="#daily-loop" className="transition-colors hover:text-[#155493] dark:hover:text-sky-400">Cách học</a>
+            <a href="#features" className="transition-colors hover:text-[#155493] dark:hover:text-sky-400">Tính năng</a>
+            <a href="#for-instructors" className="transition-colors hover:text-[#155493] dark:hover:text-sky-400">Giảng viên</a>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -60,7 +60,7 @@ export default function WelcomePage() {
 
             <a
               href="#daily-loop"
-              className="inline-flex rounded-xl bg-[#d6222f] px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:bg-[#b81b26] active:scale-95"
+              className="inline-flex rounded-xl bg-[#155493] px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:bg-[#0f3f6f] active:scale-95"
             >
               Khám phá VLearn
             </a>
@@ -89,13 +89,13 @@ export default function WelcomePage() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             {/* Left Copy */}
             <div className="space-y-6">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-bold tracking-wide text-[#d6222f] dark:bg-red-950/50 dark:text-red-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold tracking-wide text-[#155493] dark:bg-sky-950/50 dark:text-sky-300">
                 NỀN TẢNG HỌC THÍCH ỨNG · VINUNI AI THỰC CHIẾN
               </span>
 
               <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl text-slate-900 dark:text-white leading-[1.15]">
                 Chỗ nào em yếu, <br />
-                <span className="text-[#d6222f] dark:text-red-400">VLearn biết đúng chỗ đó.</span>
+                <span className="text-[#155493] dark:text-sky-400">VLearn biết đúng chỗ đó.</span>
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
@@ -105,7 +105,7 @@ export default function WelcomePage() {
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#d6222f] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#d6222f]/25 transition-all hover:bg-[#b81b26] active:scale-95"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#155493] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#155493]/25 transition-all hover:bg-[#0f3f6f] active:scale-95"
                 >
                   <span>Bắt đầu học ngay</span>
                   <ArrowRight className="h-4 w-4" />
@@ -139,10 +139,10 @@ export default function WelcomePage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d6222f] text-xs font-black text-white flex-shrink-0">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#155493] text-xs font-black text-white flex-shrink-0">
                     V
                   </div>
-                  <div className="max-w-[85%] rounded-2xl bg-red-50 p-3.5 font-medium text-[#8c121d] dark:bg-red-950/40 dark:text-red-200">
+                  <div className="max-w-[85%] rounded-2xl bg-sky-50 p-3.5 font-medium text-[#0f3f6f] dark:bg-sky-950/40 dark:text-sky-200">
                     Nếu mỗi bước cập nhật vượt qua điểm tối ưu, em nghĩ loss sẽ thay đổi như thế nào?
                   </div>
                 </div>
@@ -199,11 +199,11 @@ export default function WelcomePage() {
       <section id="daily-loop" className="py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#d6222f] dark:text-red-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#155493] dark:text-sky-400">
               MỘT VÒNG HỌC CÓ ĐỊNH HƯỚNG
             </span>
             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-slate-900 dark:text-white">
-              Đo vừa đủ. Dạy đúng lúc. <span className="text-[#d6222f] dark:text-red-400">Luyện đúng chỗ.</span>
+              Đo vừa đủ. Dạy đúng lúc. <span className="text-[#155493] dark:text-sky-400">Luyện đúng chỗ.</span>
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               VLearn bám theo nhịp học thật của sinh viên: trong buổi học, sau buổi học và khi cần ôn lại.
@@ -217,32 +217,36 @@ export default function WelcomePage() {
                 icon: BookOpenCheck,
                 title: "Học theo ngày",
                 desc: "Slide, ghi chú giảng viên và tài liệu bổ sung nằm trong cùng một không gian học tập.",
+                isBlue: true,
               },
               {
                 num: "02",
                 icon: MessageCircleQuestion,
                 title: "Tutor thích ứng",
                 desc: "Giải thích, gợi mở hoặc kiểm tra lại tùy mức độ hiểu và trạng thái của người học.",
+                isBlue: false,
               },
               {
                 num: "03",
                 icon: ClipboardCheck,
                 title: "Đánh giá sau buổi",
                 desc: "Một bài quiz ngắn giúp xác định knowledge component nào đã vững hoặc cần luyện thêm.",
+                isBlue: true,
               },
               {
                 num: "04",
                 icon: Radar,
                 title: "Mastery rõ ràng",
                 desc: "Tiến độ được cập nhật theo từng đơn vị kiến thức, có lý do và có đường luyện tiếp theo.",
+                isBlue: false,
               },
             ].map((step, idx) => (
               <div
                 key={idx}
                 className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4"
               >
-                <span className="text-3xl font-black text-red-100 dark:text-red-950">{step.num}</span>
-                <step.icon className="h-7 w-7 text-[#d6222f] dark:text-red-400" />
+                <span className={`text-3xl font-black ${step.isBlue ? 'text-sky-100 dark:text-sky-950' : 'text-red-100 dark:text-red-950'}`}>{step.num}</span>
+                <step.icon className={`h-7 w-7 ${step.isBlue ? 'text-[#155493] dark:text-sky-400' : 'text-[#d6222f] dark:text-red-400'}`} />
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">{step.title}</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{step.desc}</p>
               </div>

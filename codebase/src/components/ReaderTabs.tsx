@@ -18,7 +18,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
-  Trash2
+  Trash2,
+  CalendarDays,
+  Clock
 } from "lucide-react";
 import { MindMapView, type MindNode } from "@/components/MindMapView";
 import type { StudyNote } from "@/types/vlearn";
@@ -186,6 +188,51 @@ export function ReaderTabs({
   };
   const [newNoteText, setNewNoteText] = useState("");
 
+  // ---- Kế hoạch học tập sinh thật từ /api/study-plan ----
+  type Session = { day: number; title: string; pages: number[]; activity: string; minutes: number };
+  type Plan = { goal: string; sessions: Session[]; note: string };
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const [planMeta, setPlanMeta] = useState<string>("");
+  const [planDays, setPlanDays] = useState(3);
+  const [planLoading, setPlanLoading] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
+
+  const generatePlan = async (days: number) => {
+    if (!deck || planLoading) return;
+    setPlanLoading(true);
+    setPlanError(null);
+    setPlanDays(days);
+    try {
+      const res = await fetch("/api/study-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deck, days }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Không lập được kế hoạch.");
+      setPlan({ goal: d.goal, sessions: d.sessions || [], note: d.note });
+      setPlanMeta(metaLine(d._meta || {}));
+    } catch (e) {
+      setPlanError((e as Error).message);
+    } finally {
+      setPlanLoading(false);
+    }
+  };
+
+  /** Kế hoạch -> văn bản gọn để gửi Telegram. Người dùng đọc bản này trước khi gửi. */
+  const planAsText = (p: Plan) =>
+    [
+      `Kế hoạch học: ${materialTitle}`,
+      `Mục tiêu: ${p.goal}`,
+      "",
+      ...p.sessions.map(
+        (s) =>
+          `Buổi ${s.day} — ${s.title} (${s.minutes} phút)\n  Trang: ${s.pages.join(", ")}\n  Cách học: ${s.activity}`
+      ),
+      "",
+      p.note,
+    ].join("\n");
+
   // ---- Gửi qua Telegram: AI chỉ soạn nháp, học viên xác nhận mới gửi ----
   const [teleDraft, setTeleDraft] = useState<{ text: string; source: string } | null>(null);
   const [teleState, setTeleState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -240,6 +287,8 @@ export function ReaderTabs({
     setCardsScope(null);
     setCardIndex(0);
     setAnswers({});
+    setPlan(null);
+    setPlanError(null);
     setMindmap(null);
     setMindmapMeta(null);
     setMindmapError(null);
@@ -575,7 +624,7 @@ export function ReaderTabs({
       </div>
 
       <div className="shrink-0 border-b border-slate-200 px-3 py-2 dark:border-slate-800">
-        <div className="grid grid-cols-4 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-900">
+        <div className="grid grid-cols-5 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-900">
           <button
             onClick={() => setActiveTab("tutor")}
             className={`flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-bold transition-all ${
