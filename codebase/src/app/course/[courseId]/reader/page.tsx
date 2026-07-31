@@ -364,9 +364,10 @@ function ReaderPageInner() {
       <StuckNudge
         page={currentPage}
         activityToken={askCount}
-        // 15s cho DEMO để gợi ý kịp xuất hiện lúc trình bày. Dùng thật nên
-        // đưa về ~75s: dưới 45s là nhắc khi người ta còn đang đọc dở.
-        idleSeconds={25}
+        // 60s — mức dùng thật, không phải mức demo. Dưới 45s là nhắc khi người
+        // ta còn đang đọc dở. Muốn popup kịp bật trong nhịp demo 2 phút thì
+        // hạ về ~15s trước khi trình bày (và sửa lại demo-script.md).
+        idleSeconds={60}
         onAskHelp={(p) => {
           setActiveTab("tutor");
           setIsDrawerOpen(true);

@@ -15,7 +15,7 @@
 | **Bấm gọi thử 1 câu bất kỳ trước 5 phút** | Vercel serverless có cold start — lần gọi đầu 6,8 giây, các lần sau 1-2 giây. Gọi ấm máy trước là tránh được cú đơ đầu tiên |
 | Đóng panel Tutor lại | Để lát mở ra có động tác, đỡ tĩnh |
 | Chuẩn bị **ảnh chụp màn hình** 3 bước chính | Mạng hội trường hỏng thì vẫn kể tiếp được |
-| Tắt popup nhắc "đứng lâu" nếu ngại | Nó bật sau 15 giây (đang để mức demo) |
+| Không cần lo popup nhắc "đứng lâu" | Đang để **60 giây** (mức dùng thật) nên gần như không bật trong 2 phút demo. Muốn khoe tính năng này thì hạ `idleSeconds` về 15 trước khi lên |
 
 ---
 
