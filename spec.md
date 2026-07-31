@@ -212,9 +212,13 @@ EVAL_BASE=http://localhost:3000 node eval/run.mjs
 | Nguyễn Tuấn Hùng (`2A202601194`) | evidence | Vòng hỏi 10 người; giữ quy trình kiểm chứng số mining; hỗ trợ build flow sau CP2 |
 | Trần Trọng Thịnh (`2A202601568`) | build flow | Flow chính, lời gọi AI thật và demo CP6 |
 
-**Willing users dự kiến:** Tống Nguyễn Minh Khang, Hoàng Văn Linh và Nguyễn Mạnh Hùng — đều là học viên khóa, ngoài nhóm.
+**Willing users dự kiến ở CP1:** Tống Nguyễn Minh Khang, Hoàng Văn Linh và Nguyễn Mạnh Hùng — đều là học viên khóa, ngoài nhóm.
 
-> ⚠️ **CHƯA ĐỦ THÔNG TIN:** Ba willing users mới là danh sách dự kiến; `cp1/khao-sat-log.csv` và `validation/` chưa có phản hồi thực. Cần xác nhận họ đồng ý tham gia, rồi có ít nhất hai trong ba người xuất hiện trong feedback log CP5.
+> ⚠️ **ĐÃ ĐỐI CHIẾU SAU CP5 — danh sách dự kiến không giữ được.** Cả ba người trên đều không tham gia được vòng validation. Nguyên nhân là lỗi quy trình của nhóm: việc "hẹn trước willing users" nằm trong luồng của leader nhưng không được thực hiện — khai tên ở CP1 xong không liên hệ ai, đến CP5 mới đi tìm người.
+>
+> Vòng validation thực tế có **6 học viên khác, đều ngoài nhóm**, log đầy đủ tại [`validation/feedback-log.md`](validation/feedback-log.md): Trần Đức Mạnh, Nguyễn Xuân Hải, Nguyễn Văn Huy Hoàng, Nguyễn Phú Cường, Phạm Hoàng Anh, Bùi Xuân Hoà.
+>
+> Nhóm **cố ý không sửa ba tên gốc thành sáu tên này** — viết đè lên sẽ thành khai khống rằng đã hẹn trước đúng những người đó từ CP1. Số lượng người thử vượt yêu cầu (6 so với ≥5) và phản hồi có cả điểm chê cụ thể, nhưng điều kiện "≥2 willing user đã khai ở CP1" thì **không đạt**, ghi nhận đúng như vậy. Xem đính chính đầy đủ ở [`cp1/canvas.md`](cp1/canvas.md) mục 6.
 
 **Kế hoạch validation CP5:** giao người thử task dùng Tutor để hiểu một phần học liệu; quan sát không gợi ý; sau đó hỏi ba câu: (1) điều gì khó hiểu hoặc khó chịu nhất, (2) kết quả có đáng tin không và vì sao, (3) có dùng thật không và vì sao. Phụ trách validation ghi log nguyên văn trong `validation/`.
 

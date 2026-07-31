@@ -44,13 +44,32 @@
 
 **Willing users dự kiến (≥3) — đều là học viên khoá, ngoài nhóm:**
 
-| Tên | Vai | Đã hỏi chưa |
-|---|---|---|
-| Tống Nguyễn Minh Khang | học viên khoá | chưa |
-| Hoàng Văn Linh | học viên khoá | chưa |
-| Nguyễn Mạnh Hùng | học viên khoá | chưa |
+| Tên | Vai | Đã hỏi chưa | Kết quả ở CP5 |
+|---|---|---|---|
+| Tống Nguyễn Minh Khang | học viên khoá | chưa | **không tham gia được** |
+| Hoàng Văn Linh | học viên khoá | chưa | **không tham gia được** |
+| Nguyễn Mạnh Hùng | học viên khoá | chưa | **không tham gia được** |
 
 *CP1 chỉ cần **dự kiến** — chưa cần ai đồng ý. Nhưng chọn người thật mời được: R6 yêu cầu **≥2 trong số tên khai ở đây** phải có mặt trong feedback log ở CP5.*
+
+> ### ⚠️ Đính chính sau CP5 (31/07/2026) — danh sách dự kiến KHÔNG giữ được
+>
+> Ba tên trên là **dự kiến ở CP1 và chưa từng được hỏi trước** (cột "Đã hỏi chưa" ghi rõ *chưa* ngay từ đầu). Đến vòng validation CP5, **không mời được ai trong ba người**. Đây là lỗi quy trình của nhóm: phần "hẹn trước willing users" thuộc luồng của leader (mục 7) nhưng không được thực hiện — khai tên xong rồi để đó, không liên hệ.
+>
+> **Người thật đã thử sản phẩm ở CP5** là 6 học viên khác, đều ngoài nhóm, log đầy đủ tại [`validation/feedback-log.md`](../validation/feedback-log.md):
+>
+> | Tên | Vai | Thời điểm thử |
+> |---|---|---|
+> | Trần Đức Mạnh | học viên khoá | 31/07 11:40 |
+> | Nguyễn Xuân Hải | học viên khoá | 31/07 11:41 |
+> | Nguyễn Văn Huy Hoàng | học viên khoá | 31/07 11:44 |
+> | Nguyễn Phú Cường | học viên khoá | 31/07 11:44 |
+> | Phạm Hoàng Anh | học viên khoá | 31/07 13:27 |
+> | Bùi Xuân Hoà | học viên khoá | 31/07 13:31 |
+>
+> **Không sửa ba tên gốc thành sáu tên này.** Viết đè lên sẽ thành khai khống rằng nhóm đã hẹn trước đúng những người này từ CP1 — điều đó không đúng sự thật. Giữ nguyên bản khai gốc và ghi đính chính ở đây là cách trung thực duy nhất.
+>
+> **Bài học cho reflection:** khai willing users mà không hẹn trước thì đến lúc cần sẽ không có ai. Lần sau phải nhắn xin xác nhận ngay tại CP1, không để đến CP5.
 
 ## 7 · Phân công
 

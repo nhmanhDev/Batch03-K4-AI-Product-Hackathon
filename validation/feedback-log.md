@@ -2,18 +2,26 @@
 
 **Thu thập:** 31/07/2026, 11:40–13:31 · **Hình thức:** người thử tự dùng bản deploy `minihackathon.ai42e.com` rồi điền form · **Số người:** 6 (đều ngoài nhóm)
 
-> ⚠️ **CHƯA ĐỦ THÔNG TIN — mục còn thiếu của R6:** rubric đòi **≥2 trong 3 willing users đã khai ở CP1** (Tống Nguyễn Minh Khang · Hoàng Văn Linh · Nguyễn Mạnh Hùng) phải có mặt trong log. Sáu người dưới đây **không trùng tên nào** trong ba tên đó. Cần bổ sung phản hồi từ ít nhất 2 trong 3 người đã khai, hoặc sửa lại danh sách willing users ở `cp1/canvas.md` + `spec.md §8` cho khớp thực tế và ghi rõ lý do đổi.
+> ### Về điều kiện "≥2 willing user đã khai ở CP1" — nhóm KHÔNG đạt, ghi nhận đúng như vậy
+>
+> Ba willing users khai ở CP1 (Tống Nguyễn Minh Khang · Hoàng Văn Linh · Nguyễn Mạnh Hùng) **không ai tham gia được**. Sáu người trong log là học viên khác, cũng ngoài nhóm.
+>
+> Nguyên nhân là lỗi quy trình: việc hẹn trước willing users thuộc luồng của leader nhưng không được thực hiện — khai tên ở CP1 xong để đó, đến CP5 mới đi tìm người thử.
+>
+> Nhóm **không sửa ba tên gốc thành sáu tên này**, vì viết đè lên sẽ thành khai khống rằng đã hẹn trước đúng những người đó từ đầu. Đính chính đầy đủ ở [`cp1/canvas.md`](../cp1/canvas.md) mục 6.
+>
+> **Phần đạt:** 6 người thử (yêu cầu ≥5), đều ngoài nhóm, quote nguyên văn, có điểm chê cụ thể chứ không chỉ lời khen, và đã dẫn tới một thay đổi thật trước demo (`spec.md` §9).
 
 ## Log
 
 | Người thử (willing user CP1?) | Task | Quan sát | Quote nguyên văn | Mức nghiêm trọng |
 |---|---|---|---|---|
-| Trần Đức Mạnh — *không* | Dùng Tutor để hiểu học liệu | Vào luồng ngay, không kẹt thao tác. Vướng ở **tốc độ phản hồi** | *"sản phẩm tốt rồi"* · điểm khó: *"Tốc độ phản hồi chưa như mong đợi"* | Thấp |
-| Nguyễn Xuân Hải — *không* | Dùng Tutor để hiểu học liệu | Dùng được ngay nhưng **không biết phải bôi đen** để hỏi theo đoạn | *"Câu trả lời có trích dẫn trang cụ thể tôi tin hơn hẳn chatbot thông thường, nhưng cần thêm hướng dẫn bôi đen cho người mới."* | **Cao** |
-| Nguyễn Văn Huy Hoàng — *không* | Dùng Tutor để hiểu học liệu | Không gặp khó khăn nào | *"Thông tin đưa ra đáng tin cậy"* | Thấp |
-| Nguyễn Phú Cường — *không* | Dùng Tutor + Flashcard | Không gặp khó khăn nào; tự tìm ra và dùng được Flashcard | *"Có trích dẫn cụ thể, tóm tắt được nội đung bài học , có tạo flastcad ứng với nội dung bài"* | Thấp |
-| Phạm Hoàng Anh — *không* | Dùng Tutor để tóm tắt slide | Vào luồng ngay. Vướng ở **tốc độ phản hồi** | *"Tổng hợp slide ok"* · điểm khó: *"Tốc độ phản hồi chưa như mong đợi"* | Thấp |
-| Bùi Xuân Hoà — *không* | Dùng Tutor + Flashcard | **Lúng túng lần đầu, mất vài phút mới hiểu luồng thao tác.** Đây là người duy nhất KHÔNG cam kết dùng thật — điều kiện của họ là giao diện phải hướng dẫn rõ hơn | *"Flashcard hữu ích, tôi cảm thấy rất thích, nhưng cần thêm tính năng tìm kiếm mở rộng nội dung bên ngoài"* | **Cao** |
+| Trần Đức Mạnh — *không phải willing user CP1* | Dùng Tutor để hiểu học liệu | Vào luồng ngay, không kẹt thao tác. Vướng ở **tốc độ phản hồi** | *"sản phẩm tốt rồi"* · điểm khó: *"Tốc độ phản hồi chưa như mong đợi"* | Thấp |
+| Nguyễn Xuân Hải — *không phải willing user CP1* | Dùng Tutor để hiểu học liệu | Dùng được ngay nhưng **không biết phải bôi đen** để hỏi theo đoạn | *"Câu trả lời có trích dẫn trang cụ thể tôi tin hơn hẳn chatbot thông thường, nhưng cần thêm hướng dẫn bôi đen cho người mới."* | **Cao** |
+| Nguyễn Văn Huy Hoàng — *không phải willing user CP1* | Dùng Tutor để hiểu học liệu | Không gặp khó khăn nào | *"Thông tin đưa ra đáng tin cậy"* | Thấp |
+| Nguyễn Phú Cường — *không phải willing user CP1* | Dùng Tutor + Flashcard | Không gặp khó khăn nào; tự tìm ra và dùng được Flashcard | *"Có trích dẫn cụ thể, tóm tắt được nội đung bài học , có tạo flastcad ứng với nội dung bài"* | Thấp |
+| Phạm Hoàng Anh — *không phải willing user CP1* | Dùng Tutor để tóm tắt slide | Vào luồng ngay. Vướng ở **tốc độ phản hồi** | *"Tổng hợp slide ok"* · điểm khó: *"Tốc độ phản hồi chưa như mong đợi"* | Thấp |
+| Bùi Xuân Hoà — *không phải willing user CP1* | Dùng Tutor + Flashcard | **Lúng túng lần đầu, mất vài phút mới hiểu luồng thao tác.** Đây là người duy nhất KHÔNG cam kết dùng thật — điều kiện của họ là giao diện phải hướng dẫn rõ hơn | *"Flashcard hữu ích, tôi cảm thấy rất thích, nhưng cần thêm tính năng tìm kiếm mở rộng nội dung bên ngoài"* | **Cao** |
 
 ## Số liệu gộp
 
