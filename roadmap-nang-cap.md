@@ -63,6 +63,44 @@ Xếp theo cost-of-error và bằng chứng đã có, không xếp theo độ "n
 
 **Đã loại ở CP1** — non-goal #3: nhu cầu ôn tập được phục vụ bằng chính bản tóm tắt có trích dẫn, không phải tính năng riêng. Hai tab Flashcard/Mindmap trong UI hiện là mock trang trí (`ReaderTabs.tsx`), không nằm trong lát cắt đã chọn. Nếu làm thật, đây là **quyết định AI thứ hai** (chọn gì để đưa vào thẻ/nhánh sơ đồ) — đúng tinh thần "1 quyết định AI" đã cam kết ở CP1, nên xứng đáng là **lát cắt độc lập của một team khác**, không phải mở rộng của lát cắt này.
 
+### Nghiên cứu tham khảo — NotebookLM (`github.com/teng-lin/notebooklm-py`)
+
+Đã xem README — đây là **client điều khiển từ xa sản phẩm NotebookLM/Gemini Notebook thật của Google** qua Playwright, đăng nhập bằng tài khoản Google thật (`notebooklm login` → OAuth). Không phải thư viện chứa thuật toán sinh mindmap/flashcard — logic đó nằm trong backend riêng của Google, README tự ghi *"Unofficial Library - Use at Your Own Risk... undocumented Google APIs"*.
+
+**Không dùng thư viện này trong bản nộp** — cần tài khoản Google thật, lặp lại đúng rủi ro "đăng nhập hệ thống thật ngoài phạm vi" đã tránh suốt CP1-CP3. Cách đúng: tự gọi Gemini có structured output, giống hệt `route.ts` đang làm — không qua Google login nào.
+
+**Điều dùng được — xác nhận đúng trực giác của anh về UX:**
+
+| Loại | Tham số cấu hình (NotebookLM) | Khớp ý anh |
+|---|---|---|
+| Flashcard | *"Configurable quantity and difficulty"* | Cả bộ = 10 thẻ, 1 slide lẻ = 2-3 thẻ — đúng pattern "quantity theo phạm vi" |
+| Mind Map | Xuất dạng *"hierarchical node tree JSON"* | Sơ đồ cây phân cấp cho cả bộ, sinh khi bấm nút — không tự động |
+
+**Kiến trúc nếu làm thật (khi đã sửa non-goal #3):**
+
+```
+POST /api/flashcards   { deck, scope: "page" | "deck", currentPage? }
+  → scope="page": nhét text 1 trang, yêu cầu Gemini trả JSON [{front, back}] × 2-3
+  → scope="deck": nhét outline full-text cả bộ (đã có sẵn từ route.ts), × 8-10
+  → response_schema ép đúng số lượng + 2 trường front/back — không để model tự do
+
+POST /api/mindmap       { deck }
+  → nhét outline full-text cả bộ, yêu cầu Gemini trả cây JSON
+    { title, children: [{ title, children: [...] }] } — độ sâu tối đa 3 cấp
+  → render bằng thư viện cây có sẵn (vd react-flow / d3-hierarchy), KHÔNG cần
+    tự vẽ layout — chỉ cần đúng JSON schema từ model
+```
+
+Cả hai đều là **1 lời gọi AI structured-output**, tái dùng đúng pattern `responseSchema` đã có trong `callGemini()` — không cần công nghệ mới, chỉ cần 2 endpoint mới + 2 quyết định AI mới (đây chính là lý do phải sửa non-goal #3 trước, không phải giới hạn kỹ thuật).
+
+**Effort:** trung bình — mỗi endpoint ước 30-45 phút nếu tái dùng hạ tầng provider-chain sẵn có của `route.ts` (đổi schema, đổi prompt, giữ nguyên fallback Gemini→DeepSeek→OpenAI).
+
+**Đối chiếu thêm — `github.com/lfnovo/open-notebook`:** mã nguồn mở thật (MIT), tự host, không cần đăng nhập Google, hỗ trợ 18+ provider AI qua API key (đúng mô hình đang dùng). Đã kiểm: **không có** tính năng flashcard/mindmap (grep toàn repo ra rỗng) — core của nó là notebooks/sources/notes, "chat vs transformations" (pipeline biến đổi nội dung chung) và sinh podcast đa giọng. Không giúp trực tiếp cho việc này, nhưng đáng note lại vì kiến trúc "transformations" (biến đổi nội dung theo template tuỳ chỉnh) là pattern tổng quát tốt nếu sau này mở rộng thêm nhiều loại output ngoài flashcard/mindmap.
+
+**Đối chiếu thêm — `github.com/SYuan03/Skill-Anything`:** MIT, không cần đăng nhập Google — tự cấu hình API key LLM bất kỳ endpoint OpenAI-compatible nào (OpenAI/DeepSeek/Qwen/Ollama/vLLM), đúng mô hình provider-key hiện tại. **Có sẵn cả concept-map lẫn flashcard** (25-50 thẻ spaced-repetition) sinh từ PDF/video/web bằng 1 lệnh CLI, map-reduce pipeline cho tài liệu dài. Đây là repo **gần kiến trúc hiện tại nhất** trong 3 repo đã đối chiếu (cùng kiểu "gọi LLM API ngoài + structured output", không phụ thuộc tài khoản thật nào) — nếu làm thật tính năng flashcard/mindmap sau khi sửa non-goal #3, đáng tham khảo prompt/schema của repo này hơn là tự thiết kế từ đầu.
+
+**Đối chiếu thêm — `github.com/satellitecomponent/Neurite`:** MIT, không cần login, hỗ trợ Ollama/OpenAI/Groq/Anthropic. Mindmap ở đây là canvas fractal tương tác thủ công (nhúng note/PDF/AI agent vào không gian Mandelbrot), **không có** flashcard, và không có nút "AI tự sinh cây phân cấp" như notebooklm — khác pattern đang cần. Stack cũng nặng hơn nhiều (Electron, physics simulation) so với nhu cầu 1 endpoint JSON đơn giản. Không phù hợp tham khảo cho lát cắt này.
+
 ## 7 · Hạ tầng/deploy (domain, CI, multi-env) — ưu tiên thấp cho hackathon
 
 Không cần cho 5 tiêu chí nghiệm thu ([01-de-bai.md](01-de-bai.md)) — *"không yêu cầu deploy"*. Vercel hiện đã chạy được (`k4-hackathon-ai-42-e-d304.vercel.app`), đủ cho demo CP6. CI/CD, multi-environment (staging/prod tách biệt) chỉ cần khi có nhiều người maintain lâu dài — chưa cấp thiết cho 1,5 ngày sự kiện.

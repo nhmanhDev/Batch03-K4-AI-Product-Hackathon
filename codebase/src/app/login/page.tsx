@@ -9,7 +9,8 @@ import { BrandMark } from "@/components/BrandMark";
  * Tài khoản seed cố định, chỉ để màn hình demo trông đúng luồng thật khi
  * trình bày với mentor/giám khảo. Không có backend auth, không gọi ra ngoài.
  */
-const DEMO_EMAIL = "nhmanhDev";
+// Bốn tài khoản seed cho 4 thành viên nhóm, dùng chung một mật khẩu demo.
+const DEMO_ACCOUNTS = ["nhmanhDev", "trongnv", "hungnt", "thinhtt"];
 const DEMO_PASSWORD = "ai42e";
 
 export default function LoginPage() {
@@ -23,20 +24,15 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    if (email.trim().toLowerCase() !== DEMO_EMAIL.toLowerCase() || password !== DEMO_PASSWORD) {
-      setError("Sai email hoặc mật khẩu demo. Dùng tài khoản mẫu bên dưới.");
+    const account = email.trim().toLowerCase();
+    if (!DEMO_ACCOUNTS.some((a) => a.toLowerCase() === account) || password !== DEMO_PASSWORD) {
+      setError("Sai email hoặc mật khẩu.");
       return;
     }
 
     setIsSubmitting(true);
     document.cookie = "vlearn_demo_session=1; path=/; max-age=86400";
-    router.push("/course/COMP2010/reader");
-  };
-
-  const fillDemo = () => {
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
-    setError("");
+    router.push("/dashboard");
   };
 
   return (
@@ -66,7 +62,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#155493] focus:ring-1 focus:ring-[#155493] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-              placeholder={DEMO_EMAIL}
+              placeholder={DEMO_ACCOUNTS[0]}
             />
           </div>
           <div>
@@ -96,18 +92,6 @@ export default function LoginPage() {
             Đăng nhập
           </button>
         </form>
-
-        <div className="mt-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-          <p className="mb-1 font-medium text-slate-600 dark:text-slate-300">Tài khoản demo (seed, không phải người thật)</p>
-          <p>{DEMO_EMAIL} / {DEMO_PASSWORD}</p>
-          <button
-            type="button"
-            onClick={fillDemo}
-            className="mt-2 text-[#155493] underline underline-offset-2 hover:text-[#0f3f6f]"
-          >
-            Điền tự động
-          </button>
-        </div>
       </div>
     </div>
   );

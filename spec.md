@@ -60,7 +60,21 @@ Chọn ① vì đây là ứng viên đau nhất: 100% rating là 👎, không c
 
 ## §3. Giải pháp tương tự đã nghiên cứu
 
-> ⚠️ **CHƯA ĐỦ THÔNG TIN:** Repo chưa có biên bản dùng thử hoặc so sánh sản phẩm tương tự. Cần dùng thử ít nhất hai sản phẩm gần bài toán này và ghi cho từng sản phẩm: flow, một điều đáng học, một điều đáng tránh, và điểm khác biệt của lát cắt này.
+Đã dùng thử trực tiếp hai sản phẩm gần bài toán nhất — cùng là "hỏi đáp AI có căn cứ trên tài liệu upload":
+
+### NotebookLM (Google)
+
+- **Flow:** Upload PDF/nguồn (kể cả link YouTube) lên notebook, hỏi đáp trực tiếp với AI dựa trên các nguồn đó.
+- **Đáng học:** Nhận nguồn từ rất nhiều định dạng (PDF, web, YouTube...) rồi tự sinh nhiều dạng output từ cùng một bộ nguồn — mindmap, slide tổng quan, audio overview, video overview. Một nguồn, nhiều cách tiêu thụ lại — đúng hướng "tận dụng lại nội dung đã có" mà không bắt người dùng tạo lại từ đầu.
+- **Đáng tránh:** NotebookLM là một notebook tổng quát, không gắn với ngữ cảnh "đang ở trang nào của buổi học nào" — không có khái niệm `currentPage`/phạm vi bài giảng đang mở. Nó cũng không có quyết định phạm vi tường minh (trang/cả bộ/không đủ căn cứ/ngoài phạm vi) hiển thị ra cho người dùng trước khi trả lời — chỉ trả lời kèm citation dạng link, không nói rõ *vì sao* đủ hay không đủ căn cứ. Đây đúng là khoảng trống G2 ("làm rõ hệ thống làm tốt đến đâu") mà lát cắt này cố bịt.
+- **Khác biệt của lát cắt này:** Gắn thẳng vào luồng đọc slide đang mở trong VLearn (biết `currentPage` thật), có quyết định phạm vi tường minh hiển thị bằng badge trước khi trả lời (trang/cả bộ/thiếu căn cứ/ngoài phạm vi), và khi thiếu căn cứ thì hỏi lại đúng một câu thay vì trả lời mơ hồ hoặc chỉ đưa link nguồn.
+
+### ChatPDF
+
+- **Flow:** Upload PDF lên, hỏi đáp trực tiếp với AI dựa trên nội dung file đó.
+- **Đáng học:** Có thêm nhiều công cụ phụ trợ quanh 1 file — chat theo video YouTube, AI detector, research, tạo slide từ nội dung — mở rộng từ "hỏi đáp" sang một bộ công cụ xử lý tài liệu.
+- **Đáng tránh:** Không có bút hoặc tạo highlight trực tiếp lên PDF — muốn hỏi về một đoạn cụ thể phải gõ mô tả lại bằng tay, không bôi đen/khoanh trực tiếp trên tài liệu để hỏi.
+- **Khác biệt của lát cắt này:** Bôi đen/khoanh trực tiếp trên slide để hỏi AI về đúng đoạn đó — đúng bằng chứng CP1 (bôi đen giảm tỷ lệ "không tìm thấy nội dung" từ 21,1% xuống 2,0%, ~10 lần) — thay vì bắt học viên gõ lại mô tả đoạn cần hỏi.
 
 ## §4. Thiết kế
 
@@ -70,19 +84,23 @@ Chọn ① vì đây là ứng viên đau nhất: 100% rating là 👎, không c
 
 ### Non-goals
 
-1. Vẽ sơ đồ hoặc sinh hình ảnh.
+1. Sinh hình ảnh minh hoạ nội dung.
 2. Câu hỏi gợi ý chủ động.
-3. Một tính năng ôn tập riêng.
+3. ~~Một tính năng ôn tập riêng.~~ **Đã sửa sau CP3** — xem ghi chú bên dưới.
 4. Sửa retrieval production của VLearn; prototype chỉ dùng corpus tối thiểu của data pack.
 5. Bản đồ lỗ hổng cho giảng viên, câu hỏi logistics, lượt chào hỏi, hoặc tối ưu riêng độ dài câu trả lời.
+
+> **Ghi chú sửa non-goal #3 (và một phần #1):** ban đầu loại flashcard/sơ đồ vì coi chúng là *tính năng riêng* — tức là quyết định AI thứ hai, mâu thuẫn với cam kết "một quyết định AI". Sau khi dựng thật, hai tính năng này được đóng khung lại là **cùng một quyết định, khác định dạng đầu ra**: `/api/flashcards` và `/api/mindmap` dùng chung corpus, chung chuỗi provider và chung lớp chặn cứng với `/api/tutor` — mỗi thẻ và mỗi nhánh sơ đồ bắt buộc trích dẫn số trang có text thật, server tự loại mục nào cite sai (`pagesWithText`), không đủ căn cứ thì trả rỗng kèm lý do thay vì bịa. Sơ đồ ở đây là **cây phân cấp từ chính nội dung học liệu**, không phải sinh ảnh minh hoạ, nên vẫn nằm ngoài non-goal #1.
 
 ### Mức prototype và phần thật/mock
 
 > 🔎 **CẦN XÁC NHẬN LẠI:** Trước khi gọi prototype là “Working” trong demo, cần chạy flow trên môi trường demo với API key hợp lệ. Repo ghi rõ lời gọi AI cần key và route hiện chỉ dùng corpus Day 1.
 
-**Working** cho một bộ học liệu Day 1: reader, panel tutor, API `/api/tutor`, quyết định phạm vi/căn cứ và lời gọi AI là phần thật. Corpus là text trích xuất từ `d1-slide-hackathon.pdf` gồm 29 trang.
+**Working** — phần thật gồm: reader render PDF gốc bằng pdf.js (canvas + text layer, giữ nguyên layout của giảng viên, bôi đen được text thật), panel tutor, và ba endpoint AI cùng chuẩn grounding: `/api/tutor` (quyết định phạm vi/căn cứ), `/api/flashcards` (thẻ trắc nghiệm 4 phương án), `/api/mindmap` (cây phân cấp). Cả ba dùng chung corpus tĩnh, chuỗi provider Gemini → DeepSeek → OpenAI, và lớp chặn cứng trích dẫn ở server.
 
-Các mục curriculum 5 ngày trong sidebar, mindmap, flashcard và ghi chú là mock. Day 2 được trích xuất sẵn nhưng chưa được nối vào route.
+Corpus đã trích xuất cho 8 bộ học liệu: `d1`/`d2` (slide hackathon, 29 trang mỗi bộ), `rag1`-`rag5` (5 bài báo RAG công khai trong `tham-khao/`), và `law` (slide khoá luận của nhóm trưởng, 20 trang — dùng làm bộ demo chính cho viewer PDF thật).
+
+Ghi chú cá nhân là thật nhưng chỉ lưu trong phiên (chưa có backend); bôi đen trên slide và tab "Ghi chú" dùng chung một kho dữ liệu. Tiến độ học và trạng thái "published/studying" trong sidebar vẫn là mock.
 
 ### Automation
 
@@ -102,7 +120,7 @@ Các mục curriculum 5 ngày trong sidebar, mindmap, flashcard và ghi chú là
 
 ## §5. Kiểu lỗi — bốn lớp chỗ khó và kịch bản
 
-> 🔎 **CẦN XÁC NHẬN LẠI:** `C02` vẫn fail ở lượt chạy 08: hệ thống trả lời theo phạm vi cả bộ thay vì dừng ở trang 21. Kịch bản này chưa được coi là đã xử lý xong.
+> 🔎 **CẦN XÁC NHẬN LẠI:** `C02` từng fail ở lượt chạy 08 (hệ thống trả lời theo phạm vi cả bộ thay vì dừng ở trang 21). Đã sửa nguyên nhân gốc (outline "cả bộ" bị cắt cụt 90 ký tự/trang) từ lượt chạy 10 — `C02` đạt liên tục ở lượt 10-11 (xem bảng §7). Case `C03` mới là case chưa đạt hiện tại.
 
 | Tình huống cụ thể | Lớp | Hành vi mong muốn | Nguyên tắc |
 |---|---|---|---|

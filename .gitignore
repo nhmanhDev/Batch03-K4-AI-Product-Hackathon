@@ -6,6 +6,10 @@ out/
 next-env.d.ts
 venv/
 
+# Log server chạy tay lúc dev (npm run start > server_ps*.log)
+server_ps*.log
+*.log
+
 # Biến môi trường — KHÔNG commit API key (02-guide.md §3.4 luật an toàn ①)
 # .env*  bắt .env · .env.local · .env.development.local · .env.production.local
 # *.env  bắt prod.env · local.env

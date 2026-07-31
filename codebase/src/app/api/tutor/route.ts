@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-// Corpus là bản slide hackathon THẬT trong data pack (không phải
-// day01-slide-blue-v0/v1 — bản đó không thuộc data pack được cấp).
+// d1/d2: corpus lát cắt chính — slide hackathon THẬT trong data pack (không
+// phải day01-slide-blue-v0/v1 — bản đó không thuộc data pack được cấp).
 // Xem scripts/extract-pdf.mjs và cp1/impact-table.md giới hạn #8.
 import d1Deck from "@/data/d1-pages.json";
 import d2Deck from "@/data/d2-pages.json";
-
-type DeckId = "d1" | "d2";
-const DECKS: Record<DeckId, typeof d1Deck> = { d1: d1Deck, d2: d2Deck };
+// rag1-rag5: 5 bài báo RAG công khai (tham-khao/) — corpus demo bổ sung cho
+// Day 03-05 mock trong sidebar, KHÔNG phải học liệu thật của khoá VinUni.
+import rag1Deck from "@/data/rag1-pages.json";
+import rag2Deck from "@/data/rag2-pages.json";
+import rag3Deck from "@/data/rag3-pages.json";
+import rag4Deck from "@/data/rag4-pages.json";
+import rag5Deck from "@/data/rag5-pages.json";
+// law: slide khóa luận của chính nhóm trưởng (nguồn tự sở hữu) — deck demo cho
+// viewer PDF thật (file gốc: public/slides/chatbot-law.pdf, pdf.js render).
+import lawDeck from "@/data/law-pages.json";
+// Danh mục deck + hàm dựng ngữ cảnh dùng CHUNG với api/flashcards và
+// api/mindmap, để cả 3 ground vào đúng một nguồn sự thật.
+import { DECKS, type DeckId, pagesWithTextOf, outlineOf } from "@/lib/decks";
 
 /**
  * Rate limit đơn giản — chặn kịch bản hỏi liên tục nhiều trang khác nhau để
@@ -49,28 +59,6 @@ type TutorDecision = {
   citations: number[];
   missing: string;
 };
-
-/** Trang không có text trích xuất được (slide dạng ảnh) — không thể là nguồn trích dẫn. */
-function pagesWithTextOf(deck: typeof d1Deck) {
-  return new Set(deck.pages.filter((p) => p.chars > 0).map((p) => p.page));
-}
-
-/**
- * Full text mọi trang, KHÔNG cắt cụt. Corpus mỗi deck chỉ ~4-6K token
- * (đo bằng extract-pdf.mjs) — quá nhỏ so với context window Gemini,
- * cắt 90 ký tự/trang chỉ làm mất căn cứ thật, khiến model dễ trả lời
- * bằng kiến thức nền thay vì đọc đúng nội dung slide (rủi ro grounding
- * giả — nhìn đúng vì trùng kiến thức phổ biến, không phải vì đọc được).
- */
-function outlineOf(deck: typeof d1Deck) {
-  return deck.pages
-    .map((p) =>
-      p.chars > 0
-        ? `--- Trang ${p.page} ---\n${p.text}`
-        : `--- Trang ${p.page} --- [KHÔNG có text trích xuất được — slide dạng ảnh]`
-    )
-    .join("\n\n");
-}
 
 const SYSTEM = `Bạn là trợ giảng AI của khoá học, trả lời trong trang học VLearn.
 
@@ -303,7 +291,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     question = String(body.question ?? "").slice(0, 2000);
     currentPage = Number(body.currentPage) || 1;
-    if (body.deck === "d1" || body.deck === "d2") deckId = body.deck;
+    if (typeof body.deck === "string" && body.deck in DECKS) deckId = body.deck as DeckId;
   } catch {
     return NextResponse.json({ error: "Body không phải JSON hợp lệ." }, { status: 400 });
   }

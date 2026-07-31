@@ -12,25 +12,40 @@
  * ở đây là số trang bản rút gọn 29 trang mà học viên thấy trong app, không
  * phải số trang bản gốc trong chatlog — xem cp1/impact-table.md giới hạn #8.
  *
- * route.ts hiện chỉ dùng d1-pages.json (deck Day 1) — giữ đúng thiết kế
- * một-deck ban đầu. d2-pages.json được sinh sẵn cho việc mở rộng sau,
- * chưa wire vào route.
+ * d1/d2 dùng làm corpus cho lát cắt chính (route.ts, đúng khoá VinUni AI
+ * Thực Chiến, có evidence mining từ chatlog thật — xem cp1/).
+ *
+ * rag1-rag5 là 5 bài báo RAG công khai (tham-khao/, không dính data VLearn)
+ * — dùng làm corpus cho Day 03-05 mock trong sidebar, để AI Tutor ground
+ * được thật trên cả 5 "ngày" thay vì chỉ 2. Đây là nội dung demo bổ sung,
+ * KHÔNG phải học liệu thật của khoá — khai rõ trong spec.md khi demo.
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const OUT_DIR = resolve(import.meta.dirname, "..", "src", "data");
+const SLIDES_DIR = resolve(ROOT, "data", "vlearn-pack", "slides");
+const THAM_KHAO_DIR = resolve(ROOT, "tham-khao");
 
 const DECKS = [
-  { id: "d1", file: "d1-slide-hackathon.pdf", label: "Day 1 · AI & LLM Foundation" },
-  { id: "d2", file: "d2-slide-hackathon.pdf", label: "Day 2 · Xác định bài toán cho AI" },
+  { id: "d1", dir: SLIDES_DIR, file: "d1-slide-hackathon.pdf", label: "Day 1 · AI & LLM Foundation" },
+  { id: "d2", dir: SLIDES_DIR, file: "d2-slide-hackathon.pdf", label: "Day 2 · Xác định bài toán cho AI" },
+  { id: "rag1", dir: THAM_KHAO_DIR, file: "rag-01-document-level-knowledge-graph.pdf", label: "RAKG — Document-level Knowledge Graph Construction" },
+  { id: "rag2", dir: THAM_KHAO_DIR, file: "rag-02-ragvsgraphrag-eval.pdf", label: "RAG vs. GraphRAG — Systematic Evaluation" },
+  { id: "rag3", dir: THAM_KHAO_DIR, file: "rag-03-reasoning-rag-survey.pdf", label: "Reasoning Agentic RAG — Survey" },
+  { id: "rag4", dir: THAM_KHAO_DIR, file: "rag-04-corrective-rag.pdf", label: "Corrective Retrieval Augmented Generation" },
+  { id: "rag5", dir: THAM_KHAO_DIR, file: "rag-05-self-rag.pdf", label: "Self-RAG — Learning to Retrieve, Generate, Critique" },
+  // Slide khóa luận của chính nhóm trưởng (nguồn tự sở hữu, an toàn) — deck demo
+  // chính cho viewer PDF thật: file gốc nằm ở public/slides/chatbot-law.pdf để
+  // pdf.js render trực tiếp, còn JSON này là corpus cho AI ground.
+  { id: "law", dir: THAM_KHAO_DIR, file: "ChatbotAI - Law.pdf", label: "Chatbot tư vấn pháp luật Việt Nam — ứng dụng RAG" },
 ];
 
 const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
 
 async function extractOne(deck) {
-  const src = resolve(ROOT, "data", "vlearn-pack", "slides", deck.file);
+  const src = resolve(deck.dir, deck.file);
   const data = new Uint8Array(await readFile(src));
   const pdf = await getDocument({ data, useSystemFonts: true }).promise;
 

@@ -134,3 +134,46 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(107, 114, 128, 0.7);
 }
+
+/*
+ * "Tải học liệu" = in trang đang xem, không tải file gốc — chặn đúng lỗ hổng
+ * bảo mật đã bàn (roadmap-nang-cap.md mục 5): học viên không lấy được nguyên
+ * file, chỉ lấy được đúng 1 trang đang mở, có watermark bám theo (vì watermark
+ * là DOM thật, in ra sẽ dính theo). Bật khi gọi window.print() từ nút Tải học
+ * liệu (ReaderToolbar).
+ */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-slide-area,
+  #print-slide-area * {
+    visibility: visible;
+  }
+  #print-slide-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  /* Chế độ PDF cuộn dọc: chỉ in ĐÚNG trang đang xem (data-print-current do
+     PdfDocumentViewer đánh dấu theo trang hiện tại) — mỗi slide 1 trang PDF,
+     không cho tải cả bộ. */
+  [data-pdf-page] {
+    display: none !important;
+  }
+  [data-pdf-page][data-print-current] {
+    display: block !important;
+    max-width: 100% !important;
+  }
+}
+
+/*
+ * Text layer pdf.js: dùng CSS CHÍNH THỨC (import "pdfjs-dist/web/pdf_viewer.css"
+ * trong PdfDocumentViewer) — nó đặt font-size/scaleX từng span theo CSS var
+ * mà TextLayer ghi vào. Ở đây chỉ chỉnh màu bôi đen cho hợp brand.
+ */
+.textLayer ::selection {
+  background: rgba(37, 99, 235, 0.35);
+}

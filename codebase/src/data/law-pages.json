@@ -1,0 +1,108 @@
+{
+  "source": "ChatbotAI - Law.pdf",
+  "label": "Chatbot tư vấn pháp luật Việt Nam — ứng dụng RAG",
+  "extractedAt": "2026-07-31T01:32:34.191Z",
+  "totalPages": 20,
+  "pages": [
+    {
+      "page": 1,
+      "text": "\u0000\nK H Ó A L U Ậ N T Ô T N G H I Ệ P\nVIETNAM LEGAL ASSISTANT\n\u0000\nH Ệ T H Ô N G C H A T B O T T Ư V Â\u0000 N P H Á P L U Ậ T V I Ệ T N A M\nỨ N G D Ụ N G M Ô H Ì N H R A G\nGi ả ng viên h ướ ng d ẫ n : TS. Nguy ễ n Th ị Huy ề n Châu\nNg ườ i thuy ế t trình : A40264_Nguy ễ n Hùng M ạ nh\nA44911_D ươ ng Di ệ u Ly",
+      "chars": 305
+    },
+    {
+      "page": 2,
+      "text": "Lời nói đầu\nTrí tu ệ nhân t ạ o (AI) đang t ạ o ra nh ữ ng b ướ c ti ế n v ượ t b ậ c trong nhi ề u\nlĩnh v ự c, trong đó có lĩnh v ự c pháp lu ậ t. Vi ệ c ứ ng d ụ ng công ngh ệ AI vào\nho ạ t đ ộ ng t ư v ấ n và ph ổ bi ế n pháp lu ậ t không ch ỉ giúp t ố i ư u hóa quy\ntrình tra c ứ u thông tin mà còn nâng cao kh ả năng ti ế p c ậ n tri th ứ c pháp\nlý cho ng ườ i dân và t ổ ch ứ c.\nTài li ệ u này trình bày k ế t qu ả nghiên c ứ u và phát tri ể n h ệ th ố ng Chatbot\nt ư v ấ n pháp lu ậ t Vi ệ t Nam d ự a trên mô hình RAG (Retrieval-Augmented\nGeneration), nh ằ m góp ph ầ n vào quá trình chuy ể n đ ổ i s ố trong lĩnh v ự c\npháp lý và c ả i thi ệ n tr ả i nghi ệ m ng ườ i dùng khi tra c ứ u thông tin pháp\nlu ậ t .\nChúng em hy v ọ ng r ằ ng nghiên c ứ u này s ẽ tr ở thành tài li ệ u tham kh ả o\nh ữ u ích cho các nhà nghiên c ứ u, k ỹ s ư công ngh ệ , lu ậ t s ư , và nh ữ ng ng ườ i\nquan tâm đ ế n vi ệ c ứ ng d ụ ng trí tu ệ nhân t ạ o trong lĩnh v ự c pháp lu ậ t Vi ệ t\nNam.\nH ệ th ố ng Chatbot t ư v ấ n pháp lu ậ t Vi ệ t Nam\nứ ng d ụ ng ph ươ ng pháp RAG",
+      "chars": 1085
+    },
+    {
+      "page": 3,
+      "text": "Nội dung\nĐặt vấn đề & Giới thiệu hệ thống\n01\nTh ự c tr ạ ng, nhu c ầ u xã h ộ i và t ổ ng quan gi ả i pháp đ ề xu ấ t\nDữ liệu đầu vào\n02\nQuy trình thu th ậ p, ti ề n x ử lý và t ổ ch ứ c d ữ li ệ u đ ầ u vào\nThiết kế hệ thống ứng dụng RAG\n03\nKi ế n trúc Advanced RAG, thu ậ t toán tìm ki ế m và sinh văn b ả n\nKết quả thực nghiệm\n04\nĐánh giá đ ộ chính xác tìm ki ế m và ch ấ t l ượ ng câu tr ả l ờ i\nĐịnh hướng và Phát triển\n05\nCác c ả i ti ế n trong t ươ ng lai\nH ệ th ố ng Chatbot t ư v ấ n tuy ể n sinh Tr ườ ng\nH ệ th ố ng Chatbot t ư v ấ n pháp lu ậ t Vi ệ t Nam\nĐ ạ i h ọ c Thăng Long ứ ng d ụ ng ph ươ ng pháp RAG\nứ ng d ụ ng ph ươ ng pháp RAG",
+      "chars": 664
+    },
+    {
+      "page": 4,
+      "text": "01\nĐặt vấn đề\nThực trạng hiện tại Nhu cầu cấp thiết\nCần có một giải pháp công nghệ:\nQuá t ả i thông tin\nT ự đ ộ ng hóa vi ệ c tr ả l ờ i các câu h ỏ i th ườ ng g ặ p\nThông tin phân tán\nCung c ấ p thông tin chính xác và đ ượ c c ậ p nh ậ t\nliên t ụ c\nTh ờ i gian h ỗ tr ợ h ạ n ch ế\nH ỗ tr ợ t ư v ấ n 24/7 v ớ i th ờ i gian ph ả n h ồ i nh anh\nKhó ti ế p c ậ n đ ố i\nGi ả m t ả i công vi ệ c cho nhân viên pháp ch ế , d ễ s ử\nd ụ ng đ ố i v ớ i ng ườ i dùng ph ổ thô ng\nMục tiêu\nXây d ự ng chatbot t ư v ấ n pháp lu ậ t nhanh chóng\nTr ả l ờ i d ự a trên ngu ồ n d ữ li ệ u pháp lu ậ t đáng tin c ậ y\nTri ể n khai thành mô hình Clients - Server\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nứng dụng phương pháp RAG",
+      "chars": 724
+    },
+    {
+      "page": 5,
+      "text": "01\nGiới thiệu hệ thống\nHỆ THỐNG CHATBOT TƯ VẤN PHÁP LUẬT VIỆT NAM\nKhái ni ệ m t ổ ng quan Ch ứ c năng chính\nĐ ố i t ượ ng s ử d ụ ng\nT ư v ấ n và tra c ứ u pháp\nNg ườ i dân\nH ệ th ố ng Chatbot t ư v ấ n\nlu ậ t t ự đ ộ ng\nSinh viên và gi ả ng\npháp lu ậ t Vi ệ t Nam là m ộ t\nTrích d ẫ n ngu ồ n và đi ề u\nviên ngành Lu ậ t\nứ ng d ụ ng trí tu ệ nhân t ạ o\nkho ả n pháp lu ậ t\nC ơ quan, t ổ ch ứ c,\nđ ượ c phát tri ể n d ự a trên\nH ỗ tr ợ h ộ i tho ạ i t ự\ndoanh nghi ệ p\ncông ngh ệ x ử lý ngôn ng ữ\nnhiên\nNhà nghiên c ứ u và k ỹ\nt ự nhiên và ứ ng d ụ ng k ỹ\nD ễ tri ể n khai và d ễ m ở\ns ư AI\nthu ậ t RAG (Retrieval\nr ộ ng\nAugmented Generation)\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nứng dụng phương pháp RAG",
+      "chars": 722
+    },
+    {
+      "page": 6,
+      "text": "THU THẬP, XỬ LÝ VÀ\nTỔ CHỨC DỮ LIỆU ĐẦU VÀO\n02\nHệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 199
+    },
+    {
+      "page": 7,
+      "text": "02\nThu thập và xử lý dữ liệu đầu vào\nNguồn dữ liệu\nH ệ th ố ng s ử d ụ ng t ậ p d ữ li ệ u chính th ố ng t ừ B ộ\nPháp đi ể n Vi ệ t Nam t ừ năm 2014 đ ế n 12/2023.\nWebsite chính th ứ c: phapdien.moj.gov.vn\nTài li ệ u: S ử d ụ ng 45 ch ủ đ ề t ừ B ộ Pháp đi ể n.\nM ỗ i ch ủ đ ề có m ộ t ho ặ c nhi ề u đ ề m ụ c. Trong\nm ỗ i đ ề m ụ c có các Ph ầ n, Ch ươ ng, M ụ c, Ti ể u\nm ụ c, Đi ề u và n ộ i dung c ủ a các Đi ề u\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nứng dụng phương pháp RAG",
+      "chars": 498
+    },
+    {
+      "page": 8,
+      "text": "02\nThu thập và xử lý dữ liệu đầu vào\nQuy trình xử lý dữ liệu\nB ướ c 1: Thu th ậ p d ữ li ệ u thô B ướ c 2: Ti ề n x ử lý d ữ li ệ u B ướ c 3: T ổ ch ứ c metadata\nNgu ồ n d ữ li ệ u: S ử d ụ ng d ữ Làm s ạ ch d ữ li ệ u Phân c ấ p chi ti ế t (ch ủ đ ề ,\nli ệ u t ừ B ộ Pháp đi ể n Đi ệ n Gi ữ l ạ i c ấ u trúc văn b ả n đ ề m ụ c, ch ươ ng, kho ả n)\nt ử Vi ệ t Nam. (ch ủ đ ề , đ ề m ụ c, ph ầ n\nĐ ị nh d ạ ng đ ầ u vào: Các file ch ươ ng,...)\nJSON ch ứ a n ộ i dung văn\nb ả n lu ậ t, đ ượ c t ổ ch ứ c\ntheo t ừ ng ch ủ đ ề l ớ n.\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nứng dụng phương pháp RAG",
+      "chars": 609
+    },
+    {
+      "page": 9,
+      "text": "02\nTổ chức cấu trúc dữ liệu đầu vào\nCấu trúc dữ liệu cuối cùng\nM ỗ i đi ề u lu ậ t đ ượ c t ổ ch ứ c d ướ i d ạ ng các chunk:\n\"chunk_structure\": {\n\"page_content\": \"N ộ i dung văn b ả n pháp lu ậ t\",\n\"metadata\": {\n\"source\": \"Tên file g ố c (01_An ninh qu ố c gia)\",\n\"chu_de\": \"Ch ủ đ ề (An ninh qu ố c gia)\",\n\"de_muc\": \"Đ ề m ụ c\",\n\"chuong\": \"Ch ươ ng\",\n\"dieu\": \"Đi ề u (Đi ề u 1.1.LQ.1)\",\n\"loai_van_ban\": \"Lo ạ i văn b ả n (LQ, NĐ, TT)\",\n\"chi_muc\": \"Ch ỉ m ụ c g ố c\",\n\"mapc\": \"Mã phân c ấ p\",\n\"ten\": \"TEN g ố c\"\n}\nHệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 680
+    },
+    {
+      "page": 10,
+      "text": "THIẾT KẾ HỆ THỐNG\n03\nỨNG DỤNG PHƯƠNG PHÁP RAG\nHệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 199
+    },
+    {
+      "page": 11,
+      "text": "03\nThiết kế hệ thống\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 260
+    },
+    {
+      "page": 12,
+      "text": "03\nThiết kế hệ thống\nBasic RAG (Meta AI, 2020):\nƯ u đi ể m: Đ ơ n gi ả n, tri ể n khai nhanh,\nlý t ưở ng cho vi ệ c th ử nghi ệ m.\nH ạ n ch ế : Đ ộ chính xác truy xu ấ t th ấ p,\nd ễ b ỏ sót thông tin quan tr ọ ng.\nS ự tr ỗ i d ậ y c ủ a Advanced RAG:\nĐây là b ướ c ti ế n hóa t ấ t y ế u đ ể kh ắ c\nph ụ c các nh ượ c đi ể m c ố h ữ u, h ướ ng\nt ớ i m ộ t h ệ th ố ng RAG thông minh và\nđáng tin c ậ y h ơ n.\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 744
+    },
+    {
+      "page": 13,
+      "text": "03\nThiết kế hệ thống\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 346
+    },
+    {
+      "page": 14,
+      "text": "KẾT QUẢ THỰC NGHIỆM\n04\nVÀ ĐÁNH GIÁ HIỆU NĂNG\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 456
+    },
+    {
+      "page": 15,
+      "text": "04\nKết quả thực nghiệm\nS ử d ụ ng ph ươ ng pháp LLM-as-a-Judge đ ể đánh giá\nh ệ th ố ng m ộ t cách khách quan.\nX ây d ự ng m ộ t b ộ d ữ li ệ u g ồ m 100 câu h ỏ i và câu\ntr ả l ờ i pháp lu ậ t thu ộ c nhi ề u lĩnh v ự c nh ư Lao\nđ ộ ng, Dân s ự và Hình s ự . Giám kh ả o Gemini 2.5 Pro,\nphiên b ả n m ạ nh h ơ n so v ớ i mô hình mà h ệ th ố ng\nđang dùng, s ẽ th ự c hi ệ n đánh giá.\nH ệ th ố ng đ ượ c ch ấ m đi ể m theo 6 tiêu chí:\nAccuracy, Completeness, Clarity, Relevance,\nPracticality và Naturalness.\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 925
+    },
+    {
+      "page": 16,
+      "text": "04\nKết quả thực nghiệm\n=> H ệ th ố ng đ ạ t hi ệ u su ấ t t ổ ng th ể ở m ứ c t ố t, v ớ i kh ả năng nh ậ n di ệ n ý\nđ ị nh câu h ỏ i và đ ư a ra câu tr ả l ờ i chính xác.\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 500
+    },
+    {
+      "page": 17,
+      "text": "ĐỊNH HƯỚNG &\n05\nPHÁT TRIỂN TƯƠNG LAI\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 362
+    },
+    {
+      "page": 18,
+      "text": "05\nĐịnh hướng và Phá t triển trong tương lai\nNâng cao ch ấ t l ượ ng câu tr ả l ờ i: T ậ p trung c ả i thi ệ n đ ộ t ự\nnhiên, gi ả m “văn phong trích lu ậ t”, nh ư ng v ẫ n gi ữ đ ộ chính\nxác và căn c ứ pháp lý.\nT ố i ư u hi ệ u năng h ệ th ố ng: Gi ả m th ờ i gian ph ả n h ồ i xu ố ng\nd ướ i 2 giây, đ ả m b ả o tr ả i nghi ệ m m ượ t mà khi s ử d ụ ng\nth ự c t ế .\nH ướ ng t ớ i tri ể n khai th ự c t ế quy mô l ớ n: Hoàn thi ệ n các\ntính năng nh ư xác th ự c, phân quy ề n, phân tích s ử d ụ ng và\nkh ả năng m ở r ộ ng.\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 858
+    },
+    {
+      "page": 19,
+      "text": "TRÂN TRỌNG CẢM ƠN SỰ QUAN TÂM VÀ\nLẮNG NGHE CỦA QUÝ THẦY, CÔ\nHệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường Hệ thống Chatbot tư vấn tuyển sinh Trường\nHệ thống Chatbot tư vấn pháp luật Việt Nam\nĐại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG Đại học Thăng Long ứng dụng phương pháp RAG\nứng dụng phương pháp RAG",
+      "chars": 385
+    },
+    {
+      "page": 20,
+      "text": "DEMO HỆ THỐNG CHATBOT",
+      "chars": 21
+    }
+  ]
+}

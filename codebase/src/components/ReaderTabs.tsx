@@ -11,25 +11,44 @@ import {
   X,
   Bot,
   Clock3,
-  MessageSquarePlus
+  MessageSquarePlus,
+  ChevronsLeft,
+  Loader2,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Trash2
 } from "lucide-react";
+import { MindMapView, type MindNode } from "@/components/MindMapView";
+import type { StudyNote } from "@/types/vlearn";
 
 interface ReaderTabsProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Mở lại từ dải thu gọn. Không truyền thì dải thu gọn không hiện (giữ hành vi cũ). */
+  onOpen?: () => void;
   initialTab?: "mindmap" | "flashcards" | "notes" | "tutor";
   currentPage?: number;
   totalPages?: number;
   materialTitle?: string;
   /** Deck có corpus thật (xem src/data/). Không có = tài liệu này chưa có học liệu thật, AI Tutor tắt. */
-  deck?: "d1" | "d2";
+  deck?: "d1" | "d2" | "rag1" | "rag2" | "rag3" | "rag4" | "rag5" | "law";
+  /** Đoạn học viên vừa bôi đen trên slide (PDFViewerCanvas) — tự gửi thành câu hỏi. */
+  highlightedText?: string | null;
+  /** Gọi lại sau khi đã tiêu thụ highlightedText, để tránh gửi lặp lại khi re-render. */
+  onHighlightConsumed?: () => void;
+  /** Kho ghi chú cá nhân dùng CHUNG với note viết ở lề slide (PDFViewerCanvas). */
+  notes?: StudyNote[];
+  onAddNote?: (n: { page: number; quote?: string; text: string }) => void;
+  onRemoveNote?: (id: string) => void;
 }
 
 function buildGreeting(
   materialTitle: string,
   currentPage: number,
   totalPages: number,
-  deck?: "d1" | "d2"
+  deck?: "d1" | "d2" | "rag1" | "rag2" | "rag3" | "rag4" | "rag5" | "law"
 ) {
   return deck
     ? `Xin chào! Mình là AI Tutor VLearn. Bạn đang xem tài liệu "${materialTitle}" (Trang ${currentPage}/${totalPages}). Bạn có thắc mắc gì cần giải đáp không?`
@@ -39,11 +58,17 @@ function buildGreeting(
 export function ReaderTabs({
   isOpen,
   onClose,
+  onOpen,
   initialTab = "tutor",
   currentPage = 1,
   totalPages = 29,
   materialTitle = "d1-slide-hackathon.pdf",
-  deck
+  deck,
+  highlightedText,
+  onHighlightConsumed,
+  notes = [],
+  onAddNote,
+  onRemoveNote
 }: ReaderTabsProps) {
   const [activeTab, setActiveTab] = useState<"mindmap" | "flashcards" | "notes" | "tutor">(initialTab);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -66,10 +91,88 @@ export function ReaderTabs({
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [materialTitle, deck]);
-  const [notes, setNotes] = useState([
-    { id: "1", page: currentPage, text: "Ghi chú: Cần ôn lại các khái niệm LLM Foundations ở slide Day 01.", time: "10:24 AM" }
-  ]);
   const [newNoteText, setNewNoteText] = useState("");
+
+  // ---- Flashcard sinh thật từ /api/flashcards ----
+  type Card = { front: string; options: string[]; correctIndex: number; back: string; page: number };
+  const [cards, setCards] = useState<Card[] | null>(null);
+  const [cardsMeta, setCardsMeta] = useState<{ note?: string; meta?: string } | null>(null);
+  const [cardIndex, setCardIndex] = useState(0);
+  // Đáp án học viên đã chọn cho từng thẻ — chọn rồi mới lộ đáp án đúng.
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [cardsLoading, setCardsLoading] = useState(false);
+  const [cardsError, setCardsError] = useState<string | null>(null);
+
+  // ---- Sơ đồ tư duy sinh thật từ /api/mindmap ----
+  const [mindmap, setMindmap] = useState<MindNode | null>(null);
+  const [mindmapMeta, setMindmapMeta] = useState<{ note?: string; meta?: string } | null>(null);
+  const [mindmapLoading, setMindmapLoading] = useState(false);
+  const [mindmapError, setMindmapError] = useState<string | null>(null);
+
+  // Đổi tài liệu -> bỏ kết quả cũ, tránh hiện sơ đồ/thẻ của tài liệu trước.
+  useEffect(() => {
+    setCards(null);
+    setCardsMeta(null);
+    setCardsError(null);
+    setCardIndex(0);
+    setAnswers({});
+    setMindmap(null);
+    setMindmapMeta(null);
+    setMindmapError(null);
+  }, [materialTitle, deck]);
+
+  const metaLine = (m: { provider?: string; model?: string; latencyMs?: number; droppedCount?: number }) =>
+    [
+      m.provider && m.model ? `${m.provider}/${m.model}` : null,
+      m.latencyMs ? `${m.latencyMs}ms` : null,
+      m.droppedCount ? `bỏ ${m.droppedCount} mục không đủ căn cứ` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+  const generateCards = async (scope: "page" | "deck") => {
+    if (!deck || cardsLoading) return;
+    setCardsLoading(true);
+    setCardsError(null);
+    try {
+      const res = await fetch("/api/flashcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deck, scope, currentPage }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Không tạo được thẻ.");
+      setCards(d.cards || []);
+      setCardsMeta({ note: d.note, meta: metaLine(d._meta || {}) });
+      setCardIndex(0);
+      setAnswers({});
+    } catch (e) {
+      setCardsError((e as Error).message);
+    } finally {
+      setCardsLoading(false);
+    }
+  };
+
+  const generateMindmap = async () => {
+    if (!deck || mindmapLoading) return;
+    setMindmapLoading(true);
+    setMindmapError(null);
+    try {
+      const res = await fetch("/api/mindmap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deck }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Không dựng được sơ đồ.");
+      setMindmap(d.root || null);
+      setMindmapMeta({ note: d.note, meta: metaLine(d._meta || {}) });
+    } catch (e) {
+      setMindmapError((e as Error).message);
+    } finally {
+      setMindmapLoading(false);
+    }
+  };
 
   /**
    * Gọi /api/tutor — quyết định trung tâm của lát cắt nằm ở đó (spec.md §4):
@@ -159,24 +262,65 @@ export function ReaderTabs({
     }
   };
 
+  // Học viên bôi đen một đoạn trên slide -> tự mở tab Tutor + gửi câu hỏi.
+  // Đúng bằng chứng CP1: bôi đen giảm lỗi 10 lần so với gõ tự do (2,0% vs 21,1%).
+  useEffect(() => {
+    if (!highlightedText) return;
+    setActiveTab("tutor");
+    handleSendAiMessage(`Giải thích đoạn được bôi đen: "${highlightedText}"`);
+    onHighlightConsumed?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightedText]);
+
   const handleAddNote = () => {
     if (!newNoteText.trim()) return;
-    setNotes(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        page: currentPage,
-        text: newNoteText,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      }
-    ]);
+    // Ghi vào kho chung -> note hiện luôn ở lề trang tương ứng bên slide.
+    onAddNote?.({ page: currentPage, text: newNoteText.trim() });
     setNewNoteText("");
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !onOpen) return null;
 
   return (
-    <aside className="fixed bottom-0 right-0 top-16 z-40 flex w-full flex-col border-l border-slate-200 bg-white shadow-2xl transition-all sm:w-[420px] xl:static xl:h-full xl:w-[420px] xl:shrink-0 xl:shadow-none dark:border-slate-800 dark:bg-slate-950">
+    // 1 aside duy nhất, animate width mượt giữa rail (w-14) và panel (420px) —
+    // trước đây early-return swap 2 khối DOM riêng nên đổi trạng thái bị giật.
+    <aside
+      className={`fixed bottom-0 right-0 top-16 z-40 flex flex-col overflow-hidden bg-white transition-all duration-300 ease-in-out xl:static xl:h-full xl:shrink-0 dark:bg-slate-950 ${
+        isOpen
+          ? "w-full border-l border-slate-200 shadow-2xl sm:w-[420px] xl:w-[420px] xl:shadow-none dark:border-slate-800"
+          : "w-0 xl:w-14 xl:border-l xl:border-slate-200 dark:xl:border-slate-800"
+      }`}
+    >
+      {/* Rail đóng — luôn render (desktop), crossfade với panel đầy đủ. */}
+      {onOpen && (
+        <button
+          onClick={onOpen}
+          title="Mở VLearn Tutor"
+          className={`absolute inset-y-0 right-0 hidden w-14 flex-col items-center gap-3 py-4 transition-opacity duration-200 hover:bg-slate-50 xl:flex dark:hover:bg-slate-900 ${
+            isOpen ? "pointer-events-none opacity-0" : "opacity-100 delay-150"
+          }`}
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400">
+            <ChevronsLeft className="h-4 w-4" />
+          </span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-[#155493] dark:bg-sky-950/70 dark:text-sky-300">
+            <Bot className="h-4 w-4" />
+          </span>
+          <span
+            className="mt-1 text-[10px] font-bold tracking-wide text-slate-400 dark:text-slate-500"
+            style={{ writingMode: "vertical-rl" }}
+          >
+            VLearn Tutor
+          </span>
+        </button>
+      )}
+
+      {/* Panel đầy đủ — fade out trong lúc khung co về rail, fade in khi mở. */}
+      <div
+        className={`flex h-full w-full shrink-0 flex-col transition-opacity duration-200 sm:w-[420px] ${
+          isOpen ? "opacity-100 delay-100" : "pointer-events-none opacity-0"
+        }`}
+      >
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-[#155493] dark:bg-sky-950/70 dark:text-sky-300">
@@ -184,8 +328,11 @@ export function ReaderTabs({
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">VLearn Tutor</p>
-            <p className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            <p className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
               Trợ lý học theo ngữ cảnh
             </p>
           </div>
@@ -314,31 +461,6 @@ export function ReaderTabs({
               )}
             </div>
 
-            {/* Quick suggested prompts */}
-            <div className="space-y-2 pt-2">
-              <p className="text-[11px] font-bold text-slate-400">Gợi ý thắc mắc mẫu (Lát cắt Demo):</p>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  onClick={() => handleSendAiMessage(`Tóm tắt nội dung slide trang ${currentPage} này`)}
-                  className="rounded-lg border border-sky-200 bg-sky-50/70 px-2.5 py-1.5 text-left text-[11px] font-semibold text-[#124f8c] transition-colors hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-300"
-                >
-                  📌 <strong>[Trang đang xem]</strong> Tóm tắt slide trang {currentPage} này
-                </button>
-                <button
-                  onClick={() => handleSendAiMessage(`Tóm tắt toàn bộ tài liệu này (${totalPages} trang)`)}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-[11px] font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                >
-                  📚 <strong>[Cả bộ slide]</strong> Tóm tắt toàn bộ tài liệu này ({totalPages} trang)
-                </button>
-                <button
-                  onClick={() => handleSendAiMessage("Cho mình xin đáp án bài tập về nhà buổi này")}
-                  className="rounded-lg border border-amber-200 bg-amber-50/70 px-2.5 py-1.5 text-left text-[11px] font-semibold text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300"
-                >
-                  ⚠️ <strong>[Thiếu căn cứ]</strong> Hỏi đáp án bài tập về nhà
-                </button>
-              </div>
-            </div>
-
             {/* Chat Input */}
             <div className="relative">
               <input
@@ -360,62 +482,252 @@ export function ReaderTabs({
           </div>
         )}
 
-        {/* Tab 2: Mindmap Sơ đồ tư duy */}
+        {/* Tab 2: Sơ đồ tư duy — sinh thật từ /api/mindmap, mỗi nhánh cite trang */}
         {activeTab === "mindmap" && (
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-900 dark:text-white">
-              Sơ đồ tư duy học liệu ({materialTitle})
-            </h3>
-            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-              <div className="rounded-lg bg-white p-3 shadow-sm border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
-                <span className="font-bold text-[#124f8c] dark:text-sky-400 text-xs">📌 1. LLM Foundations</span>
-                <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300">
-                  Next Token Prediction, Auto-regressive Models, Tokenization.
-                </p>
-              </div>
-              <div className="ml-4 border-l-2 border-[#124f8c]/30 pl-3 space-y-2">
-                <div className="rounded-lg bg-white p-3 shadow-sm border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
-                  <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">🔹 2. Transformer Architecture</span>
-                  <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300">
-                    Encoder-Decoder, Positional Encoding, Multi-Head Attention.
-                  </p>
-                </div>
-                <div className="rounded-lg bg-white p-3 shadow-sm border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
-                  <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">🔹 3. Training Phases</span>
-                  <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300">
-                    Pre-training → SFT → RLHF Alignment.
-                  </p>
-                </div>
-              </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="min-w-0 truncate text-xs font-bold text-slate-900 dark:text-white">
+                Sơ đồ tư duy · {materialTitle}
+              </h3>
+              {mindmap && (
+                <button
+                  onClick={generateMindmap}
+                  disabled={mindmapLoading}
+                  className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold text-[#124f8c] hover:bg-sky-50 disabled:opacity-50 dark:text-sky-400 dark:hover:bg-sky-950/50"
+                >
+                  <RefreshCw className={`h-3 w-3 ${mindmapLoading ? "animate-spin" : ""}`} />
+                  Tạo lại
+                </button>
+              )}
             </div>
+
+            {!deck && (
+              <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+                Tài liệu này chưa có học liệu thật trong bản demo nên chưa dựng được sơ đồ.
+              </p>
+            )}
+
+            {deck && !mindmap && !mindmapLoading && (
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-center dark:border-slate-800 dark:bg-slate-800/50">
+                <BrainCircuit className="mx-auto h-8 w-8 text-[#124f8c] dark:text-sky-400" />
+                <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                  Dựng sơ đồ tư duy cho toàn bộ {totalPages} trang của tài liệu này. Mỗi nhánh đều
+                  kèm số trang để bạn kiểm chứng lại được.
+                </p>
+                <button
+                  onClick={generateMindmap}
+                  className="w-full rounded-xl bg-[#124f8c] px-3 py-2 text-xs font-bold text-white hover:bg-[#0b355f] dark:bg-sky-500 dark:text-slate-950"
+                >
+                  Tạo sơ đồ tư duy
+                </button>
+              </div>
+            )}
+
+            {mindmapLoading && (
+              <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-6 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-800/50">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang đọc {totalPages} trang và dựng sơ đồ…
+              </div>
+            )}
+
+            {mindmapError && (
+              <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+                {mindmapError}
+              </p>
+            )}
+
+            {mindmap && (
+              <div className="space-y-2">
+                <MindMapView root={mindmap} title={materialTitle} />
+                {mindmapMeta?.note && (
+                  <p className="text-[11px] italic text-slate-500 dark:text-slate-400">
+                    {mindmapMeta.note}
+                  </p>
+                )}
+                {mindmapMeta?.meta && (
+                  <p className="text-[10px] font-mono text-slate-400">{mindmapMeta.meta}</p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Tab 3: Flashcards */}
+        {/* Tab 3: Flashcards — sinh thật từ /api/flashcards, mỗi thẻ cite trang */}
         {activeTab === "flashcards" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">
-                Thẻ ghi nhớ Flashcards (3 thẻ)
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="min-w-0 truncate text-xs font-bold text-slate-900 dark:text-white">
+                Thẻ ghi nhớ{cards?.length ? ` · ${cards.length} thẻ` : ""}
               </h3>
-              <span className="text-[11px] font-semibold text-[#124f8c] dark:text-sky-400">
-                Đã thuộc: 1/3
-              </span>
+              {!!cards?.length && (
+                <span className="shrink-0 text-[11px] font-semibold text-[#124f8c] dark:text-sky-400">
+                  {cardIndex + 1} / {cards.length}
+                </span>
+              )}
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm text-center space-y-3 dark:border-slate-800 dark:bg-slate-800">
-              <span className="inline-block rounded-md bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-[#124f8c] dark:bg-sky-950 dark:text-sky-400">
-                Câu hỏi 1 / 3
-              </span>
-              <p className="text-xs font-bold text-slate-900 dark:text-white leading-relaxed">
-                Self-Attention trong Transformer có công dụng chính là gì?
+            {!deck && (
+              <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+                Tài liệu này chưa có học liệu thật trong bản demo nên chưa tạo được thẻ.
               </p>
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
-                <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
-                  Trả lời: Tính toán mức độ liên quan giữa tất cả các token trong cùng một câu văn bản.
-                </p>
+            )}
+
+            {/* Hai phạm vi tạo thẻ — đúng ý: cả bộ thì nhiều thẻ, 1 trang thì vài thẻ */}
+            {deck && (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => generateCards("deck")}
+                  disabled={cardsLoading}
+                  className="rounded-xl bg-[#124f8c] px-2 py-2 text-[11px] font-bold text-white hover:bg-[#0b355f] disabled:opacity-50 dark:bg-sky-500 dark:text-slate-950"
+                >
+                  Cả bộ ({totalPages} trang) · 10 thẻ
+                </button>
+                <button
+                  onClick={() => generateCards("page")}
+                  disabled={cardsLoading}
+                  className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-[11px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  Trang {currentPage} · 3 thẻ
+                </button>
               </div>
-            </div>
+            )}
+
+            {cardsLoading && (
+              <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-6 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-800/50">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang đọc học liệu và soạn thẻ…
+              </div>
+            )}
+
+            {cardsError && (
+              <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+                {cardsError}
+              </p>
+            )}
+
+            {cards && !cards.length && !cardsLoading && (
+              <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+                {cardsMeta?.note || "Chưa tạo được thẻ nào có căn cứ trong học liệu này."}
+              </p>
+            )}
+
+            {!!cards?.length && (() => {
+              const card = cards[cardIndex];
+              const picked = answers[cardIndex];
+              const answered = picked !== undefined;
+              const correct = answered && picked === card.correctIndex;
+              const doneCount = Object.keys(answers).length;
+              const rightCount = Object.entries(answers).filter(
+                ([i, a]) => cards[Number(i)]?.correctIndex === a
+              ).length;
+
+              return (
+                <>
+                  {doneCount > 0 && (
+                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                      Đã làm {doneCount}/{cards.length} · đúng {rightCount}
+                    </p>
+                  )}
+
+                  <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-800">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="rounded-md bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-[#124f8c] dark:bg-sky-950 dark:text-sky-400">
+                        Câu {cardIndex + 1} / {cards.length}
+                      </span>
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-700 dark:text-slate-300">
+                        tr.{card.page}
+                      </span>
+                    </div>
+
+                    <p className="text-xs font-bold leading-relaxed text-slate-900 dark:text-white">
+                      {card.front}
+                    </p>
+
+                    {/* Chọn xong mới lộ đáp án đúng — trước đó không gợi ý gì. */}
+                    <div className="space-y-1.5">
+                      {card.options.map((opt, i) => {
+                        const isCorrect = i === card.correctIndex;
+                        const isPicked = picked === i;
+                        const style = !answered
+                          ? "border-slate-200 bg-white hover:border-[#124f8c] hover:bg-sky-50/60 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700"
+                          : isCorrect
+                            ? "border-emerald-400 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/50"
+                            : isPicked
+                              ? "border-red-400 bg-red-50 dark:border-red-800 dark:bg-red-950/50"
+                              : "border-slate-200 bg-white opacity-60 dark:border-slate-700 dark:bg-slate-800";
+                        return (
+                          <button
+                            key={i}
+                            disabled={answered}
+                            onClick={() => setAnswers((prev) => ({ ...prev, [cardIndex]: i }))}
+                            className={`flex w-full items-start gap-2 rounded-xl border px-2.5 py-2 text-left text-[11px] font-medium leading-snug transition-colors ${style}`}
+                          >
+                            <span className="mt-px shrink-0 font-bold text-slate-400">
+                              {String.fromCharCode(65 + i)}.
+                            </span>
+                            <span className="flex-1 text-slate-800 dark:text-slate-200">{opt}</span>
+                            {answered && isCorrect && (
+                              <Check className="mt-px h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                            )}
+                            {answered && isPicked && !isCorrect && (
+                              <X className="mt-px h-3.5 w-3.5 shrink-0 text-red-500" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {answered && (
+                      <div
+                        className={`rounded-xl border p-2.5 text-left ${
+                          correct
+                            ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40"
+                            : "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40"
+                        }`}
+                      >
+                        <p
+                          className={`mb-1 text-[11px] font-bold ${
+                            correct
+                              ? "text-emerald-700 dark:text-emerald-400"
+                              : "text-amber-800 dark:text-amber-400"
+                          }`}
+                        >
+                          {correct
+                            ? "Chính xác!"
+                            : `Chưa đúng — đáp án là ${String.fromCharCode(65 + card.correctIndex)}.`}
+                        </p>
+                        <p className="text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">
+                          {card.back}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => setCardIndex((i) => Math.max(0, i - 1))}
+                      disabled={cardIndex === 0}
+                      className="flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-1.5 text-[11px] font-bold text-slate-600 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      Trước
+                    </button>
+                    <button
+                      onClick={() => setCardIndex((i) => Math.min(cards.length - 1, i + 1))}
+                      disabled={cardIndex >= cards.length - 1}
+                      className="flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-1.5 text-[11px] font-bold text-slate-600 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      Sau
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  {cardsMeta?.meta && (
+                    <p className="text-[10px] font-mono text-slate-400">{cardsMeta.meta}</p>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
 
@@ -443,19 +755,50 @@ export function ReaderTabs({
               </button>
             </div>
 
+            {!notes.length && (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-[11px] italic leading-relaxed text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400">
+                Chưa có ghi chú nào. Gõ ở ô trên, hoặc bôi đen một đoạn trên slide rồi bấm “Ghi chú” —
+                cả hai cách đều lưu vào chung một chỗ này.
+              </p>
+            )}
+
             <div className="space-y-2">
-              {notes.map((n) => (
-                <div key={n.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/60">
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span className="font-semibold text-[#124f8c] dark:text-sky-400">Trang {n.page}</span>
-                    <span>{n.time}</span>
+              {[...notes]
+                .sort((a, b) => a.page - b.page)
+                .map((n) => (
+                  <div
+                    key={n.id}
+                    className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/60"
+                  >
+                    <div className="flex items-center justify-between text-[11px] text-slate-400">
+                      <span className="font-semibold text-[#124f8c] dark:text-sky-400">
+                        Trang {n.page}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span>{n.time}</span>
+                        <button
+                          onClick={() => onRemoveNote?.(n.id)}
+                          title="Xoá ghi chú"
+                          className="text-slate-400 hover:text-red-500"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                    {n.quote && (
+                      <p className="mt-1 line-clamp-2 border-l-2 border-amber-300 pl-1.5 text-[10px] italic leading-snug text-slate-500 dark:text-slate-400">
+                        “{n.quote}”
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs font-medium text-slate-800 dark:text-slate-200">
+                      {n.text}
+                    </p>
                   </div>
-                  <p className="mt-1 text-xs text-slate-800 dark:text-slate-200 font-medium">{n.text}</p>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         )}
+      </div>
       </div>
     </aside>
   );
