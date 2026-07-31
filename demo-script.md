@@ -181,9 +181,27 @@ Cả ba nhịp đều đúng hành vi mong đợi. Ảnh nhịp 2 lưu ở [`dem
 
 Phần nói của 6 slide phải tự bấm giờ, vì nó phụ thuộc người trình bày. Ghi lại vào bảng dưới sau khi chạy thử:
 
+> **Trạng thái: CHƯA CHẠY.** Ghi nhận đúng như vậy thay vì điền số cho đủ ô — bảng này có cột "vượt ở đâu" và "sửa gì", điền mà không chạy thật thì không ai trả lời khớp được khi bị hỏi lại.
+
 | Lần | Ngày giờ | Người trình bày | Tổng thời gian | Vượt/thiếu ở đâu | Sửa gì |
 |---|---|---|---|---|---|
 | 1 | | | | | |
 | 2 | | | | | |
+
+### Phân bổ lại 6 slide cho vừa 5:00 — dùng bảng này làm mốc khi bấm giờ
+
+Guide đưa 330 giây cho 5 phút nên phải phân bổ lại. Đã bỏ nhịp 3 nên máy chỉ chiếm ~2 giây (917ms + 1.035ms):
+
+| Slide | Guide | **Dùng mốc này** | Cắt ở đâu |
+|---|---|---|---|
+| 1 · User & Job | 45″ | **40″** | Một câu pain + một con số (21,1% vs 2,0%). Bỏ phần dẫn dắt |
+| 2 · Vì sao chọn | 45″ | **40″** | 3 ứng viên, mỗi cái một dòng. Không giải thích lại cách đếm |
+| 3 · Giải pháp + demo | 2′00″ | **1′40″** | Lát cắt 20″ + nhịp 1 (40″) + nhịp 2 (40″). **Không chạy nhịp 3** |
+| 4 · Kết quả đo | 45″ | **40″** | 95% vs bar 85% + C03 + câu đính chính slide in sai |
+| 5 · User thật nói gì | 45″ | **40″** | 2 quote có tên + 1 thay đổi đã làm |
+| 6 · Thêm 1 tuần | 30″ | **25″** | 3 gạch đầu dòng + 1 câu bài học |
+| | **5:30** | **4:45** | dư **15 giây** phòng vấp |
+
+Bấm giờ từng slide theo cột giữa. Slide nào quá 5 giây so với mốc thì cắt ngay ở lượt 2, đừng đợi cộng dồn tới slide 6 mới biết.
 
 **Cách chạy cho đúng:** bấm giờ từ slide 1, nói thật thành tiếng (không nhẩm trong đầu — nhẩm luôn nhanh hơn nói thật khoảng 30%), demo thao tác thật trên deploy chứ không tưởng tượng. Chạy 2 lần: lần 1 để biết mình dài ở đâu, lần 2 để xác nhận đã cắt đúng chỗ.
