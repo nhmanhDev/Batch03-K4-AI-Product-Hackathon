@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Download, Maximize2, X } from "lucide-react";
 
 /**
@@ -176,6 +177,28 @@ export function MindMapView({ root, title }: { root: MindNode; title: string }) 
   const svgRef = useRef<SVGSVGElement>(null);
 
   /**
+   * Cổng render riêng gắn vào <body>.
+   *
+   * Không portal thẳng vào document.body: ở Next.js App Router chính <body> do
+   * React quản lý, chèn node vào đó gây xung đột reconcile và xoá sạch DOM.
+   * Tạo một div trung gian React không đụng tới thì an toàn.
+   *
+   * Cần portal vì popup nằm trong <aside z-40> của panel Tutor — aside tạo
+   * ngăn xếp riêng nên z-[120] bên trong vẫn kẹt ở mức 40, thua header z-50,
+   * khiến nút "Tải PNG"/"Đóng" bị header che và bấm không được.
+   */
+  const [portalEl, setPortalEl] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = document.createElement("div");
+    el.setAttribute("data-mindmap-portal", "");
+    document.body.appendChild(el);
+    setPortalEl(el);
+    return () => {
+      el.remove();
+    };
+  }, []);
+
+  /**
    * Mở popup thì đẩy thêm một mốc lịch sử, để nút Back của trình duyệt ĐÓNG
    * popup thay vì rời hẳn trang reader (trước đây Back nhảy về /my-courses,
    * mất luôn tài liệu đang đọc). Đóng bằng nút X thì tự lùi lại mốc đó.
@@ -257,13 +280,13 @@ export function MindMapView({ root, title }: { root: MindNode; title: string }) 
         </span>
       </button>
 
-      {/* Popup toàn màn hình */}
-      {open && (
+      {/* Popup toàn màn hình — xem ghi chú ở portalEl phía trên. */}
+      {open && portalEl && createPortal(
         <div
           className="fixed inset-0 z-[120] flex flex-col bg-slate-900/80 backdrop-blur-sm"
           onClick={close}
         >
-          <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-3">
+          <div className="flex shrink-0 items-center justify-between gap-3 px-6 pb-3 pt-5">
             <p className="min-w-0 truncate text-sm font-bold text-white">Sơ đồ tư duy · {title}</p>
             <div className="flex shrink-0 items-center gap-2">
               <button
@@ -287,14 +310,17 @@ export function MindMapView({ root, title }: { root: MindNode; title: string }) 
           </div>
 
           <div
-            className="min-h-0 flex-1 overflow-auto p-5 pt-0"
+            // pb-8 để cuộn hết vẫn còn khoảng thở dưới đáy; trước đây pt-0
+            // khiến thẻ sơ đồ dính sát header, nhìn rất chật.
+            className="min-h-0 flex-1 overflow-auto px-6 pb-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto w-fit rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mx-auto w-fit rounded-2xl bg-white p-8 shadow-2xl">
               <MindMapSvg root={root} svgRef={svgRef} />
             </div>
           </div>
-        </div>
+        </div>,
+        portalEl
       )}
     </>
   );
