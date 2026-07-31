@@ -80,12 +80,19 @@ export function ReaderTabs({
   const [activeTab, setActiveTab] = useState<"mindmap" | "flashcards" | "notes" | "tutor">(initialTab);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  type Session = { day: number; title: string; pages: number[]; activity: string; minutes: number };
+  type Plan = { goal: string; sessions: Session[]; note: string };
   type ChatMessage = {
     sender: "ai" | "user";
     text: string;
     badge?: string;
     citation?: string;
     meta?: string;
+    /** Kế hoạch học tập đính kèm — hiện thành thẻ ngay trong hội thoại. */
+    plan?: Plan;
+    /** Tin mở đầu của luồng lập kế hoạch: nút gửi nằm trên thẻ kế hoạch bên
+     *  dưới, không nhân đôi ở đây (nhìn như bắt xác nhận hai lần). */
+    hideSend?: boolean;
   };
   /**
    * Nhiều cuộc trò chuyện SONG SONG, mỗi cuộc là một mục độc lập trong danh
@@ -188,35 +195,11 @@ export function ReaderTabs({
   };
   const [newNoteText, setNewNoteText] = useState("");
 
-  // ---- Kế hoạch học tập sinh thật từ /api/study-plan ----
-  type Session = { day: number; title: string; pages: number[]; activity: string; minutes: number };
-  type Plan = { goal: string; sessions: Session[]; note: string };
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [planMeta, setPlanMeta] = useState<string>("");
-  const [planDays, setPlanDays] = useState(3);
-  const [planLoading, setPlanLoading] = useState(false);
-  const [planError, setPlanError] = useState<string | null>(null);
-
-  const generatePlan = async (days: number) => {
-    if (!deck || planLoading) return;
-    setPlanLoading(true);
-    setPlanError(null);
-    setPlanDays(days);
-    try {
-      const res = await fetch("/api/study-plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deck, days }),
-      });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error || "Không lập được kế hoạch.");
-      setPlan({ goal: d.goal, sessions: d.sessions || [], note: d.note });
-      setPlanMeta(metaLine(d._meta || {}));
-    } catch (e) {
-      setPlanError((e as Error).message);
-    } finally {
-      setPlanLoading(false);
-    }
+  /** Học viên nói "trong 5 ngày"/"3 buổi" thì tôn trọng con số đó, mặc định 3. */
+  const guessDays = (q: string) => {
+    const m = q.match(/(\d+)\s*(ngày|buổi|hôm)/i);
+    const n = m ? Number(m[1]) : NaN;
+    return Number.isInteger(n) && n >= 1 && n <= 7 ? n : 3;
   };
 
   /** Kế hoạch -> văn bản gọn để gửi Telegram. Người dùng đọc bản này trước khi gửi. */
@@ -287,8 +270,6 @@ export function ReaderTabs({
     setCardsScope(null);
     setCardIndex(0);
     setAnswers({});
-    setPlan(null);
-    setPlanError(null);
     setMindmap(null);
     setMindmapMeta(null);
     setMindmapError(null);
@@ -428,6 +409,7 @@ export function ReaderTabs({
         badge,
         text: d.sufficient ? d.answer : d.missing || d.answer,
         citation,
+        hideSend: d.intent === "study_plan",
         meta: [
           `${d._meta?.provider}/${d._meta?.model}`,
           `${d._meta?.latencyMs}ms`,
@@ -435,6 +417,37 @@ export function ReaderTabs({
           guard.length ? `guardrail: ${guard.join(" · ")}` : null,
         ].filter(Boolean).join(" · "),
       }]);
+
+      // AI nhận ra học viên xin LẬP KẾ HOẠCH -> gọi tiếp skill lập kế hoạch và
+      // đính thẻ kế hoạch vào ngay hội thoại. Vẫn chỉ SOẠN: muốn gửi Telegram
+      // thì học viên tự bấm nút trên thẻ, AI không có đường nào tự gửi.
+      if (d.intent === "study_plan" && d.sufficient && deck) {
+        setIsThinking(true);
+        try {
+          const pres = await fetch("/api/study-plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deck, days: guessDays(query) }),
+          });
+          const p = await pres.json();
+          if (!pres.ok) throw new Error(p.error || "Không lập được kế hoạch.");
+          setChatMessages(prev => [...prev, {
+            sender: "ai",
+            badge: `🗓️ KẾ HOẠCH ${p.sessions?.length || 0} BUỔI · ${p._meta?.totalMinutes || 0} PHÚT`,
+            text: p.goal || "",
+            plan: { goal: p.goal, sessions: p.sessions || [], note: p.note },
+            meta: metaLine(p._meta || {}),
+          }]);
+        } catch (e) {
+          setChatMessages(prev => [...prev, {
+            sender: "ai",
+            badge: "🔌 LỖI LẬP KẾ HOẠCH",
+            text: (e as Error).message,
+          }]);
+        } finally {
+          setIsThinking(false);
+        }
+      }
     } catch (e) {
       setChatMessages(prev => [...prev, {
         sender: "ai",
@@ -624,7 +637,7 @@ export function ReaderTabs({
       </div>
 
       <div className="shrink-0 border-b border-slate-200 px-3 py-2 dark:border-slate-800">
-        <div className="grid grid-cols-5 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-900">
+        <div className="grid grid-cols-4 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-900">
           <button
             onClick={() => setActiveTab("tutor")}
             className={`flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-bold transition-all ${
@@ -712,9 +725,56 @@ export function ReaderTabs({
                           {msg.meta}
                         </div>
                       )}
+                      {/* Thẻ kế hoạch học tập — AI lập khi học viên xin trong chat. */}
+                      {msg.plan && (
+                        <div className="mt-2 space-y-2">
+                          {msg.plan.sessions.map((s) => (
+                            <div
+                              key={s.day}
+                              className="rounded-xl border border-slate-200 bg-white p-2.5 dark:border-slate-700 dark:bg-slate-900"
+                            >
+                              <div className="mb-1 flex items-start justify-between gap-2">
+                                <span className="text-[11px] font-extrabold text-[#124f8c] dark:text-sky-300">
+                                  Buổi {s.day} · {s.title}
+                                </span>
+                                <span className="flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-500 dark:bg-slate-700 dark:text-slate-300">
+                                  <Clock className="h-2.5 w-2.5" />
+                                  {s.minutes}′
+                                </span>
+                              </div>
+                              <p className="mb-1 text-[10px] font-semibold text-slate-400">
+                                Trang {s.pages.join(", ")}
+                              </p>
+                              <p className="text-[11px] leading-snug text-slate-600 dark:text-slate-300">
+                                {s.activity}
+                              </p>
+                            </div>
+                          ))}
+                          {msg.plan.note && (
+                            <p className="text-[10px] italic leading-snug text-slate-500 dark:text-slate-400">
+                              {msg.plan.note}
+                            </p>
+                          )}
+                          {!!msg.plan.sessions.length && (
+                            <button
+                              onClick={() =>
+                                setTeleDraft({
+                                  text: planAsText(msg.plan!),
+                                  source: `Kế hoạch học · ${materialTitle}`,
+                                })
+                              }
+                              className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#124f8c] px-3 py-2 text-[11px] font-bold text-white hover:bg-[#0b355f] dark:bg-sky-500 dark:text-slate-950"
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              Gửi kế hoạch qua Telegram
+                            </button>
+                          )}
+                        </div>
+                      )}
+
                       {/* Chỉ câu trả lời của AI mới có nút gửi. AI KHÔNG tự gửi —
                           bấm vào đây chỉ mở hộp xác nhận, học viên đọc rồi mới chốt. */}
-                      {msg.sender === "ai" && msg.citation && (
+                      {msg.sender === "ai" && msg.citation && !msg.plan && !msg.hideSend && (
                         <button
                           onClick={() =>
                             setTeleDraft({

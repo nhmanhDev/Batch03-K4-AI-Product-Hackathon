@@ -114,16 +114,21 @@ LUẬT BẮT BUỘC:
 6. Không đưa đáp án bài tập cụ thể/trắc nghiệm về nhà. Tuy nhiên, khi học viên xin "tóm tắt bài này / kiến thức trọng tâm cần thi / nội dung chính", đây là yêu cầu tổng quan bài học -> đặt scope="deck", sufficient=true và tóm tắt kiến thức chính từ dàn ý bộ slide.
 7. "answer" viết bằng tiếng Việt, đúng cỡ câu hỏi. Khi sufficient=false thì "answer" để chuỗi rỗng và viết vào "missing".
 8. "targetPage": khi scope="page", ĐÂY LÀ SỐ TRANG mà câu trả lời nói về — mặc định là trang đang mở, nhưng nếu học viên hỏi thẳng về trang khác thì điền đúng số trang họ hỏi. Các scope khác để 0.
-9. Nếu có khối HỘI THOẠI TRƯỚC ĐÓ: dùng nó để hiểu câu hỏi rút gọn ("còn cái kia thì sao?", "giải thích rõ hơn đi") đang trỏ vào đâu, rồi trả lời tiếp mạch. Nhưng MỌI TRÍCH DẪN vẫn phải lấy từ học liệu, tuyệt đối không cite dựa trên lời bạn nói ở lượt trước.`;
+9. Nếu có khối HỘI THOẠI TRƯỚC ĐÓ: dùng nó để hiểu câu hỏi rút gọn ("còn cái kia thì sao?", "giải thích rõ hơn đi") đang trỏ vào đâu, rồi trả lời tiếp mạch. Nhưng MỌI TRÍCH DẪN vẫn phải lấy từ học liệu, tuyệt đối không cite dựa trên lời bạn nói ở lượt trước.
+10. "intent" — nhận ra học viên đang cần DẠNG VIỆC gì:
+   · "study_plan" khi họ xin LẬP KẾ HOẠCH học/ôn tập theo buổi hoặc theo ngày — ví dụ "lập kế hoạch ôn tập", "chia lịch học bộ này trong 3 ngày", "lên lộ trình học". Khi đó đặt scope="deck", sufficient=true, và "answer" chỉ viết MỘT câu ngắn báo đã lập xong kế hoạch bên dưới — KHÔNG tự liệt kê các buổi trong "answer", vì kế hoạch chi tiết do bước sau sinh ra.
+   · "answer" cho mọi trường hợp còn lại.
+   Nếu học viên có nhắc tới việc gửi đi (Telegram, gửi cho tôi...), CỨ ĐỂ intent như trên và trong "answer" nói rõ họ xem lại rồi tự bấm nút gửi. Bạn KHÔNG có quyền gửi bất cứ thứ gì ra ngoài.`;
 
 /** Gemini nhận schema qua API; hai provider còn lại phải mô tả trong prompt. */
 const JSON_SHAPE = `
 Chỉ trả về JSON đúng dạng sau, không thêm chữ nào ngoài JSON:
-{"scope":"page"|"deck"|"out_of_scope","targetPage":số trang,"sufficient":true|false,"answer":"string","citations":[số trang],"missing":"string"}`;
+{"intent":"answer"|"study_plan","scope":"page"|"deck"|"out_of_scope","targetPage":số trang,"sufficient":true|false,"answer":"string","citations":[số trang],"missing":"string"}`;
 
 const geminiSchema = {
   type: "object",
   properties: {
+    intent: { type: "string", enum: ["answer", "study_plan"] },
     scope: { type: "string", enum: ["page", "deck", "out_of_scope"] },
     targetPage: { type: "integer" },
     sufficient: { type: "boolean" },
@@ -131,7 +136,7 @@ const geminiSchema = {
     citations: { type: "array", items: { type: "integer" } },
     missing: { type: "string" },
   },
-  required: ["scope", "targetPage", "sufficient", "answer", "citations", "missing"],
+  required: ["intent", "scope", "targetPage", "sufficient", "answer", "citations", "missing"],
 };
 
 async function callGemini(user: string): Promise<string> {

@@ -366,7 +366,7 @@ function ReaderPageInner() {
         activityToken={askCount}
         // 15s cho DEMO để gợi ý kịp xuất hiện lúc trình bày. Dùng thật nên
         // đưa về ~75s: dưới 45s là nhắc khi người ta còn đang đọc dở.
-        idleSeconds={15}
+        idleSeconds={25}
         onAskHelp={(p) => {
           setActiveTab("tutor");
           setIsDrawerOpen(true);
