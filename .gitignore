@@ -26,9 +26,10 @@ scratch/
 # Cả hai đều là tư liệu nội bộ, không phải sản phẩm nộp.
 docs/
 
-# Slide bản đầy đủ tự tải thêm — KHÔNG thuộc pack chính thức BTC cấp
-# (chỉ 2 file d1/d2-slide-hackathon.pdf mới được cấp, xem data/vlearn-pack/README.md).
-# 02-guide.md §5.2: "không đổ nguyên data pack lên" — chặn cứng ở đây,
-# không phụ thuộc việc nhớ tránh mỗi lần git add.
-data/vlearn-pack/slides/D[0-9]*.pdf
+# TOÀN BỘ data pack của BTC — 02-guide.md §5.2: "không đổ nguyên data pack lên".
+# Luật cũ chỉ chặn D[0-9]*.pdf nên 2 file viết thường d1/d2-slide-hackathon.pdf,
+# chatlog và transcript vẫn lọt lên GitHub public. Chặn cả thư mục cho chắc.
+# Lưu ý: các file này VẪN còn trong lịch sử git của những commit trước —
+# gỡ hẳn cần viết lại lịch sử (git filter-repo + force push), làm sau deadline.
+data/
 day01-slide-blue-v0.pdf

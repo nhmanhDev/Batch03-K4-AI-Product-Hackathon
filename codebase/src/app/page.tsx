@@ -1,8 +1,13 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 
-export default async function Home() {
-  const cookieStore = await cookies();
-  const hasDemoSession = cookieStore.get("vlearn_demo_session")?.value === "1";
-  redirect(hasDemoSession ? "/dashboard" : "/welcome");
+/**
+ * Trang gốc luôn là landing page công khai (/welcome), kể cả khi đã đăng nhập.
+ *
+ * Trước đây root tự nhảy vào /dashboard nếu còn cookie phiên (max-age 24h),
+ * nên người vào lần đầu sau khi ai đó từng đăng nhập trên cùng máy sẽ bị đẩy
+ * thẳng vào trong, không kịp thấy trang giới thiệu. Luồng đúng:
+ * /welcome -> bấm "Đăng nhập" -> /login -> /dashboard.
+ */
+export default function Home() {
+  redirect("/welcome");
 }
