@@ -7,13 +7,13 @@ Phụ trách **evidence và narrative cho demo**: kiểm tra số liệu từ ch
 ## 2. Phần mình làm
 
 - Kiểm tra các chỉ số trong chatlog bằng `cp1/scripts/verify.py`, đặc biệt là chênh lệch giữa gõ tự do (`160/757 = 21,1%` bị từ chối) và có bôi đen (`10/495 = 2,0%`). Tôi dùng kết quả này để giải thích vì sao nhóm tập trung vào quyết định AI về phạm vi căn cứ: trang đang mở hay cả bộ slide.
-- Đối chiếu evidence cho Slide 2: `14/23` yêu cầu tóm tắt một trang bị từ chối trực tiếp; `23/67` yêu cầu tóm tắt cả bộ/buổi bị từ chối trực tiếp; đồng thời kiểm lại tín hiệu khảo sát mở Mindmap `7/24` và Flashcard `9/24`. Chi tiết truy vết ở `analysis/slide2_chatlog_evidence.md` và `cp1/impact-table.md`.
-- Làm giao diện/nội dung cho `analysis/slide2.html`: giữ các con số có thể tái lập, tách rõ tín hiệu khảo sát mở với bằng chứng từ chatlog, và nêu lý do không tách citation hay độ dài câu trả lời thành tính năng riêng.
-- Tổng hợp 6 phản hồi user test cho `analysis/slide5.html`. Slide dùng quote nguyên văn về độ tin cậy nhờ citation, giá trị của tóm tắt/flashcard, và nhu cầu cải thiện hướng dẫn ban đầu/tìm kiếm mở rộng.
+- Đối chiếu evidence cho Slide 2: `14/23` yêu cầu tóm tắt một trang bị từ chối trực tiếp; `23/67` yêu cầu tóm tắt cả bộ/buổi bị từ chối trực tiếp; đồng thời kiểm lại tín hiệu khảo sát mở Mindmap `7/24` và Flashcard `9/24`. Chi tiết truy vết ở `cp1/impact-table.md` và báo cáo phân tích `cp1/scripts/analysis_report_vi.html` (sinh từ `cp1/scripts/analyze_chatlog.py`).
+- Làm nội dung Slide 2 trong `demo-slides.pdf`: giữ các con số có thể tái lập, tách rõ tín hiệu khảo sát mở với bằng chứng từ chatlog, và nêu lý do không tách citation hay độ dài câu trả lời thành tính năng riêng.
+- Tổng hợp 6 phản hồi user test cho Slide 5 trong `demo-slides.pdf`, nguồn là `validation/feedback-log.md`. Slide dùng quote nguyên văn về độ tin cậy nhờ citation, giá trị của tóm tắt/flashcard, và nhu cầu cải thiện hướng dẫn ban đầu/tìm kiếm mở rộng.
 
 ## 3. AI hỗ trợ như thế nào
 
-Tôi dùng AI để hỗ trợ viết script truy vấn CSV và gợi ý cách diễn đạt ngắn cho phần thuyết trình. Tôi không dùng kết quả AI trực tiếp làm bằng chứng: mọi số trên Slide 2 được chạy lại bằng `python cp1/scripts/verify.py` hoặc đếm lại từ `cp1/traloi2.csv`; các quote trên Slide 5 được lấy từ phản hồi khảo sát, không tự tạo. 
+Tôi dùng AI để hỗ trợ viết script truy vấn CSV và gợi ý cách diễn đạt ngắn cho phần thuyết trình. Tôi không dùng kết quả AI trực tiếp làm bằng chứng: mọi số trên Slide 2 được chạy lại bằng `python cp1/scripts/verify.py` hoặc đếm lại từ `cp1/khao-sat-log.csv`; các quote trên Slide 5 được lấy nguyên văn từ `validation/feedback-log.md`, không tự tạo.
 
 ## 4. Bài học từ case fail của nhóm
 

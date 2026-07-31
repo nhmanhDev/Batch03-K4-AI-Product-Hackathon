@@ -11,11 +11,11 @@ Tôi đảm nhận vai trò chủ trì luồng **Prompt Engineering và Bộ Đ�
 ---
 
 ## 2. Phần công việc cụ thể đã hoàn thành (Files & Commits)
-* **Xây dựng bộ Golden Set 20 Case (`eval/golden-set.json`):** Khai thác dữ liệu từ 1.261 log chat thật của VLearn, thiết lập 20 test case đại diện cho 4 lớp chỗ khó (case mơ hồ `C03, C04`, ngoài phạm vi `C05, C17, C18`, prompt injection `C06, C19`, slide ảnh `C02`).
+* **Xây dựng bộ Golden Set 20 Case (`eval/golden-set.json`):** Khai thác dữ liệu từ 1.261 log chat thật của VLearn, thiết lập 20 test case đại diện cho 4 lớp chỗ khó theo `spec.md` §5: ① nguồn sự thật `C01, C02`, ② mơ hồ/thiếu thông tin `C03, C04`, ③ ngoài phạm vi/thẩm quyền `C05, C06`, ④ đặc thù domain `C07, C08`.
 * **Viết System Prompt & Định hình Schema (`codebase/src/app/api/tutor/route.ts`):** 
-  * Cấu hình System Prompt `SYSTEM` (dòng 49-83) với quy trình xử lý 3 bước và luật `mustAskBack` (bắt buộc hỏi lại có dấu `?` khi học viên gõ từ cụt).
-  * Định nghĩa `geminiSchema` (dòng 90-100) ép LLM trả về đúng JSON 5 trường.
-* **Vận hành Vòng lặp Eval (`eval/run.mjs` & `eval/run-06.md`):** Chạy kiểm thử tự động 6 lượt test, phân tích đối chiếu trực tiếp với Quality Bar (≥85%), nâng độ chính xác từ 80% lên 100% (20/20 case).
+  * Cấu hình System Prompt `SYSTEM` (dòng 77-121) với 10 luật bắt buộc, trong đó luật 3 chia quy trình xét thành 2 bước: **BƯỚC 1** bắt buộc hỏi lại đúng một câu có dấu `?` khi câu hỏi không nêu đối tượng ("tóm tắt", "d", "ok"), **BƯỚC 2** mới chốt phạm vi.
+  * Định nghĩa `geminiSchema` (dòng 128-140) ép LLM trả về đúng JSON **7 trường bắt buộc**: `intent`, `scope`, `targetPage`, `sufficient`, `answer`, `citations`, `missing`.
+* **Vận hành Vòng lặp Eval (`eval/run.mjs`, `eval/run-01.md` → `eval/run-18.md`):** Chạy kiểm thử tự động theo nhịp *chạy trọn bộ → bảng % → sửa một failure → chạy lại trọn bộ*. Kết quả 18 lượt dao động **85%–100%**, thấp nhất là `run-03` và `run-07` (17/20), **lượt mới nhất `run-18` đạt 19/20 = 95%**, vượt Quality Bar ≥85% và giữ 0 vi phạm ở cả hai điều kiện cứng. Case chưa đạt hiện tại là `C03`.
 
 ---
 
@@ -40,7 +40,7 @@ Tôi đảm nhận vai trò chủ trì luồng **Prompt Engineering và Bộ Đ�
 * **Lựa chọn:** **Conditional Automation / Augment** (AI hỗ trợ có điều kiện dựa trên bằng chứng cứng, không Automate hoàn toàn).
 * **Vì sao:** 
   * **Dựa trên Cost-of-Error (Chi phí lỗi):** Trong giáo dục, chi phí của một câu trả lời sai hoặc bịa đặt (hallucination) là cực kỳ đắt — học viên tiếp thu sai kiến thức, làm sai bài tập/quiz và mất hoàn toàn niềm tin vào trợ lý học tập. 
-  * **Cơ chế hoạt động:** Trợ lý VLearn AI Tutor chỉ **Automate** việc trả lời khi có **đầy đủ 100% căn cứ (Grounding)** trực tiếp trong trang slide đang mở hoặc tài liệu buổi học. Nếu câu hỏi mơ hồ, từ ngữ cụt (`C03, C04`) hoặc nằm ngoài phạm vi (`C05, C17, C18`), hệ thống chuyển sang **Augment** bằng cách: chủ động hỏi lại (`mustAskBack`) để làm rõ ý định, hoặc chỉ rõ thiếu kiến thức gì và gợi ý đúng trang slide chứa thông tin thay vì tự tiện đoán mò.
+  * **Cơ chế hoạt động:** Trợ lý VLearn AI Tutor chỉ **Automate** việc trả lời khi có **đầy đủ 100% căn cứ (Grounding)** trực tiếp trong trang slide đang mở hoặc tài liệu buổi học. Nếu câu hỏi mơ hồ, từ ngữ cụt (`C03, C04`) hoặc nằm ngoài phạm vi (`C05, C06`), hệ thống chuyển sang **Augment** bằng cách: chủ động hỏi lại đúng một câu (luật BƯỚC 1 trong `SYSTEM`) để làm rõ ý định, hoặc chỉ rõ thiếu kiến thức gì và gợi ý đúng trang slide chứa thông tin thay vì tự tiện đoán mò.
 
 ###  Câu 2: Failure nguy hiểm nhất?
 * **Failure nguy hiểm nhất:** **Trích dẫn giả / Sai căn cứ phạm vi (Hallucinated Citation & False Grounding)** — điển hình là **Case C02** (`eval/golden-set.json`).
@@ -51,7 +51,7 @@ Tôi đảm nhận vai trò chủ trì luồng **Prompt Engineering và Bộ Đ�
 * **Nhân sự & Luồng phụ trách:** **Nguyễn Văn Trọng (Mã HV: 2A202601102)** — Phụ trách luồng **Prompt Engineering & Golden Set Evaluation (`eval/`)**.
 * **Đầu ra sản phẩm cụ thể (Artifacts):**
   1. **Xây dựng bộ Golden Set 20 Cases (`eval/golden-set.json`):** Khai thác 1.261 log chat thật của VLearn, phủ đủ 4 lớp chỗ khó (mơ hồ, ngoài phạm vi, prompt injection, slide ảnh).
-  2. **Thiết kế System Prompt & Schema JSON (`codebase/src/app/api/tutor/route.ts`):** Xây dựng quy trình xử lý 3 bước, luật `mustAskBack` khi học viên gõ câu cụt và ép Schema JSON 5 trường (`geminiSchema`).
-  3. **Vận hành Vòng lặp Eval (`eval/run.mjs` & `eval/run-06.md`):** Chạy 6 lượt kiểm thử tự động, theo dõi Quality Bar (≥85%), giúp tối ưu chính xác từ 80% lên 100% (20/20 case).
+  2. **Thiết kế System Prompt & Schema JSON (`codebase/src/app/api/tutor/route.ts`):** 10 luật bắt buộc, luật hỏi lại khi học viên gõ câu cụt (BƯỚC 1), và ép Schema JSON 7 trường (`geminiSchema`).
+  3. **Vận hành Vòng lặp Eval (`eval/run.mjs`, 18 lượt chạy trong `eval/`):** Theo dõi Quality Bar ≥85% qua từng lượt; lượt mới nhất `run-18` đạt 19/20 = 95%, `C03` chưa đạt và được ghi nhận nguyên trạng thay vì hạ chuẩn cho qua.
   4. **Phối hợp phát triển Server Guardrail (`validateCitations`):** Chặn trích dẫn sai số trang ngay từ mã nguồn TypeScript trên Server.
 
