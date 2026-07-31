@@ -224,7 +224,7 @@ EVAL_BASE=http://localhost:3000 node eval/run.mjs
 
 ## §9. Changelog
 
-> ⚠️ **CHƯA ĐỦ THÔNG TIN:** Chỉ có một thay đổi được ghi rõ trong artifact hiện có. Mọi lần đổi prompt, guardrail, case hoặc UI sau thời điểm chốt quality bar cần được bổ sung vào bảng này cùng lý do và liên kết tới failure/feedback tương ứng.
+Bảy thay đổi sau thời điểm chốt quality bar, mỗi dòng nối về failure hoặc feedback đã gây ra nó. Hai dòng cuối đến từ vòng validation CP5 — một dòng **đổi** và một dòng **giữ nguyên có lý do**, theo đúng yêu cầu `02-guide.md` §4.3.
 
 | Thời điểm | Đổi gì | Vì sao |
 |---|---|---|
