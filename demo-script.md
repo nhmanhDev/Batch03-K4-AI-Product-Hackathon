@@ -107,12 +107,34 @@ Bấm **"Gửi kế hoạch qua Telegram"** → hộp xác nhận hiện nguyên
 
 ---
 
-## Dry run — bấm giờ, làm ít nhất 1 lần
+## Dry run
 
 Mốc thời gian mục tiêu theo guide §5.1: slide 1 (45″) · slide 2 (45″) · **slide 3 + demo live (2′)** · slide 4 (45″) · slide 5 (45″) · slide 6 (30″).
 
-Ghi lại thời gian thật của lần chạy thử vào đây sau khi làm:
+### Phần máy — ĐÃ ĐO THẬT trên bản deploy (31/07)
 
-| Lần | Ngày giờ | Tổng thời gian | Vượt/thiếu ở đâu | Sửa gì |
-|---|---|---|---|---|
-| | | | | |
+Chạy trọn chuỗi thao tác demo trên `minihackathon.ai42e.com`, đăng nhập bằng `nhmanhDev`, đo bằng `performance.now()`:
+
+| Nhịp | Thao tác | Thời gian đo được |
+|---|---|---|
+| Chuẩn bị | Tải reader + render trang 5 (đã ấm máy) | **0,5 giây** |
+| 1 | Bôi đen → bấm "Hỏi AI" → câu trả lời hiện đủ kèm badge + citation | **1,5 giây** |
+| 2 | Gõ "MCP là gì" → hiện badge NGOÀI PHẠM VI | **1,3 giây** |
+| 3 | Gõ "lập kế hoạch ôn tập 3 ngày gửi tele" → thẻ kế hoạch 3 buổi hiện đủ | **3,6 giây** |
+| 3b | Bấm gửi → xác nhận → Telegram báo "Đã gửi" | **1,2 giây** |
+| | **Tổng thời gian máy chờ** | **≈ 8 giây** |
+
+**Ý nghĩa cho việc chia thời gian:** trong 2 phút của slide 3, máy chỉ chiếm **8 giây**. 112 giây còn lại là **người nói và thao tác chuột**. Nghĩa là không được im lặng chờ — mỗi nhịp chỉ có 1-3 giây trống, vừa đủ một câu nói đã chuẩn bị sẵn (xem phần "Nói trong lúc chờ" ở trên). Nếu bỏ nhịp 3 thì máy chỉ chiếm ~3 giây.
+
+**Cảnh báo đã kiểm chứng:** con số trên là khi **đã ấm máy**. Lần gọi đầu sau khi Vercel ngủ mất **6,8 giây** — gần bằng cả ba nhịp cộng lại. Bắt buộc gọi thử một câu trước khi lên.
+
+### Phần người — CẦN LÀM, không ai đo hộ được
+
+Phần nói của 6 slide phải tự bấm giờ, vì nó phụ thuộc người trình bày. Ghi lại vào bảng dưới sau khi chạy thử:
+
+| Lần | Ngày giờ | Người trình bày | Tổng thời gian | Vượt/thiếu ở đâu | Sửa gì |
+|---|---|---|---|---|---|
+| 1 | | | | | |
+| 2 | | | | | |
+
+**Cách chạy cho đúng:** bấm giờ từ slide 1, nói thật thành tiếng (không nhẩm trong đầu — nhẩm luôn nhanh hơn nói thật khoảng 30%), demo thao tác thật trên deploy chứ không tưởng tượng. Chạy 2 lần: lần 1 để biết mình dài ở đâu, lần 2 để xác nhận đã cắt đúng chỗ.
