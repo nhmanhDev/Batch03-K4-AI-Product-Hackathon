@@ -132,6 +132,7 @@ export function ReaderSidebar({
             <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
             <input
               type="text"
+              spellCheck={false}
               placeholder="Tìm kiếm bài học, tài liệu..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

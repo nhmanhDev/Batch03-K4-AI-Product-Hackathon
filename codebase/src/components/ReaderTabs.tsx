@@ -656,6 +656,7 @@ export function ReaderTabs({
             <div className="relative">
               <input
                 type="text"
+                spellCheck={false}
                 placeholder="Đặt câu hỏi cho AI Tutor VLearn..."
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
@@ -944,6 +945,7 @@ export function ReaderTabs({
             <div className="flex gap-2">
               <input
                 type="text"
+                spellCheck={false}
                 placeholder="Thêm ghi chú bài học..."
                 value={newNoteText}
                 onChange={(e) => setNewNoteText(e.target.value)}

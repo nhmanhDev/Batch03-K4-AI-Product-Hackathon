@@ -118,6 +118,7 @@ export function ConfusionModal({
               </label>
               <textarea
                 rows={2}
+                spellCheck={false}
                 placeholder="Nhập câu hỏi hoặc phần cụ thể bạn muốn giảng chi tiết hơn..."
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}

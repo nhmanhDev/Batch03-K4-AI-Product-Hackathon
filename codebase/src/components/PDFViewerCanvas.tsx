@@ -693,6 +693,7 @@ def generate_text(prompt, model, max_tokens=50):
 
               <textarea
                 autoFocus
+                spellCheck={false}
                 value={highlights.find((h) => h.id === activeNoteId)!.note}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -736,6 +737,7 @@ def generate_text(prompt, model, max_tokens=50):
               {editingTextId === t.id ? (
                 <textarea
                   autoFocus
+                  spellCheck={false}
                   value={t.content}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -858,6 +860,7 @@ def generate_text(prompt, model, max_tokens=50):
                           {editing ? (
                             <textarea
                               autoFocus
+                              spellCheck={false}
                               value={n.text}
                               onChange={(e) => onUpdateNote?.(n.id, e.target.value)}
                               onBlur={() => {
