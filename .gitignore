@@ -20,7 +20,11 @@ server_ps*.log
 # Script cào dữ liệu & file thử nghiệm tạm thời
 scripts/
 scratch/
-docs/research/
+
+# Toàn bộ docs/ — research là dữ liệu cào từ VLearn thật, design-references là
+# ảnh chụp màn hình VLearn thật (có thể dính watermark email cá nhân).
+# Cả hai đều là tư liệu nội bộ, không phải sản phẩm nộp.
+docs/
 
 # Slide bản đầy đủ tự tải thêm — KHÔNG thuộc pack chính thức BTC cấp
 # (chỉ 2 file d1/d2-slide-hackathon.pdf mới được cấp, xem data/vlearn-pack/README.md).
