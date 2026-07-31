@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   BrainCircuit,
   CreditCard,
@@ -38,6 +38,9 @@ interface ReaderTabsProps {
   highlightedText?: string | null;
   /** Gọi lại sau khi đã tiêu thụ highlightedText, để tránh gửi lặp lại khi re-render. */
   onHighlightConsumed?: () => void;
+  /** Câu hỏi do popup nhắc "đứng lâu ở trang" sinh ra — tự gửi khi có giá trị. */
+  pendingQuestion?: string | null;
+  onPendingQuestionSent?: () => void;
   /** Kho ghi chú cá nhân dùng CHUNG với note viết ở lề slide (PDFViewerCanvas). */
   notes?: StudyNote[];
   onAddNote?: (n: { page: number; quote?: string; text: string }) => void;
@@ -66,6 +69,8 @@ export function ReaderTabs({
   deck,
   highlightedText,
   onHighlightConsumed,
+  pendingQuestion,
+  onPendingQuestionSent,
   notes = [],
   onAddNote,
   onRemoveNote
@@ -73,24 +78,112 @@ export function ReaderTabs({
   const [activeTab, setActiveTab] = useState<"mindmap" | "flashcards" | "notes" | "tutor">(initialTab);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isThinking, setIsThinking] = useState(false);
-  const [chatMessages, setChatMessages] = useState<Array<{
+  type ChatMessage = {
     sender: "ai" | "user";
     text: string;
     badge?: string;
     citation?: string;
     meta?: string;
-  }>>([
-    { sender: "ai", text: buildGreeting(materialTitle, currentPage, totalPages, deck) }
-  ]);
+  };
+  /**
+   * Nhiều cuộc trò chuyện SONG SONG, mỗi cuộc là một mục độc lập trong danh
+   * sách; `activeId` chỉ ra cuộc đang hiển thị. Mở một cuộc cũ chỉ là đổi
+   * activeId — không gộp, không xoá cuộc nào, nên hội thoại không lẫn vào nhau.
+   *
+   * Lưu bằng sessionStorage (không phải localStorage): hội thoại thuộc về phiên
+   * học, đóng tab là hết — đúng với việc bản demo chưa có backend, và không để
+   * lại dấu vết lâu dài trên máy dùng chung.
+   */
+  type Convo = { id: string; title: string; at: string; messages: ChatMessage[] };
+  const convosKey = `vlearn_convos_${deck ?? "none"}`;
 
-  // Đổi tài liệu (đổi materialTitle/deck) -> reset hội thoại, lời chào phải
-  // khớp tài liệu đang xem. Không reset khi chỉ đổi trang (currentPage).
+  const newConvo = (): Convo => ({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    title: "Cuộc trò chuyện mới",
+    at: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    messages: [{ sender: "ai", text: buildGreeting(materialTitle, currentPage, totalPages, deck) }],
+  });
+
+  const [convos, setConvos] = useState<Convo[]>([]);
+  const [activeId, setActiveId] = useState<string>("");
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Đổi tài liệu -> nạp đúng bộ hội thoại của tài liệu đó (mỗi deck một kho).
   useEffect(() => {
-    setChatMessages([
-      { sender: "ai", text: buildGreeting(materialTitle, currentPage, totalPages, deck) }
-    ]);
+    let list: Convo[] = [];
+    try {
+      const raw = sessionStorage.getItem(convosKey);
+      const parsed = raw ? (JSON.parse(raw) as Convo[]) : [];
+      if (Array.isArray(parsed)) list = parsed.filter((c) => c?.id && Array.isArray(c.messages));
+    } catch {
+      // sessionStorage bị chặn (chế độ riêng tư) -> chạy không lưu.
+    }
+    if (!list.length) list = [newConvo()];
+    setConvos(list);
+    setActiveId(list[0].id);
+    setShowHistory(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [materialTitle, deck]);
+  }, [convosKey]);
+
+  const persistConvos = (list: Convo[]) => {
+    setConvos(list);
+    try {
+      sessionStorage.setItem(convosKey, JSON.stringify(list));
+    } catch {
+      // Vượt hạn mức hoặc bị chặn -> bỏ qua, không làm hỏng luồng chat.
+    }
+  };
+
+  const active = convos.find((c) => c.id === activeId);
+  const chatMessages = active?.messages ?? [];
+
+  /** Ghi tin nhắn vào ĐÚNG cuộc đang mở; tiêu đề lấy từ câu hỏi đầu tiên. */
+  const setChatMessages = (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+    setConvos((prev) => {
+      const next = prev.map((c) => {
+        if (c.id !== activeId) return c;
+        const messages = typeof updater === "function" ? updater(c.messages) : updater;
+        const firstAsk = messages.find((m) => m.sender === "user")?.text;
+        return {
+          ...c,
+          messages,
+          title: firstAsk
+            ? firstAsk.length > 60
+              ? firstAsk.slice(0, 58) + "…"
+              : firstAsk
+            : "Cuộc trò chuyện mới",
+        };
+      });
+      try {
+        sessionStorage.setItem(convosKey, JSON.stringify(next));
+      } catch {
+        // bỏ qua
+      }
+      return next;
+    });
+  };
+
+  const startNewConversation = () => {
+    const c = newConvo();
+    persistConvos([c, ...convos].slice(0, 20));
+    setActiveId(c.id);
+    setShowHistory(false);
+    setActiveTab("tutor");
+  };
+
+  /** Mở cuộc cũ = chỉ đổi cuộc đang hiển thị. Không đụng vào cuộc nào cả. */
+  const openConversation = (id: string) => {
+    setActiveId(id);
+    setShowHistory(false);
+    setActiveTab("tutor");
+  };
+
+  const deleteConversation = (id: string) => {
+    const rest = convos.filter((c) => c.id !== id);
+    const list = rest.length ? rest : [newConvo()];
+    persistConvos(list);
+    if (id === activeId) setActiveId(list[0].id);
+  };
   const [newNoteText, setNewNoteText] = useState("");
 
   // ---- Flashcard sinh thật từ /api/flashcards ----
@@ -100,6 +193,8 @@ export function ReaderTabs({
   const [cardIndex, setCardIndex] = useState(0);
   // Đáp án học viên đã chọn cho từng thẻ — chọn rồi mới lộ đáp án đúng.
   const [answers, setAnswers] = useState<Record<number, number>>({});
+  // Phạm vi của bộ thẻ ĐANG hiển thị — để tô đúng nút nào đang được chọn.
+  const [cardsScope, setCardsScope] = useState<"page" | "deck" | null>(null);
   const [cardsLoading, setCardsLoading] = useState(false);
   const [cardsError, setCardsError] = useState<string | null>(null);
 
@@ -114,6 +209,7 @@ export function ReaderTabs({
     setCards(null);
     setCardsMeta(null);
     setCardsError(null);
+    setCardsScope(null);
     setCardIndex(0);
     setAnswers({});
     setMindmap(null);
@@ -144,6 +240,7 @@ export function ReaderTabs({
       if (!res.ok) throw new Error(d.error || "Không tạo được thẻ.");
       setCards(d.cards || []);
       setCardsMeta({ note: d.note, meta: metaLine(d._meta || {}) });
+      setCardsScope(scope);
       setCardIndex(0);
       setAnswers({});
     } catch (e) {
@@ -198,10 +295,17 @@ export function ReaderTabs({
     setIsThinking(true);
 
     try {
+      // Gửi kèm vài lượt gần nhất để AI nối được mạch ("còn cái kia thì sao?").
+      // Bỏ lời chào mở đầu vì nó không mang thông tin hội thoại.
+      const history = chatMessages
+        .filter((m) => !(m.sender === "ai" && m.text.startsWith("Xin chào!")))
+        .slice(-6)
+        .map((m) => ({ role: m.sender === "user" ? "user" : "ai", text: m.text }));
+
       const res = await fetch("/api/tutor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: query, currentPage, deck }),
+        body: JSON.stringify({ question: query, currentPage, deck, history }),
       });
       const d = await res.json();
 
@@ -275,6 +379,15 @@ export function ReaderTabs({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlightedText]);
 
+  // Câu hỏi từ popup nhắc "đứng lâu ở trang" — đi cùng đường với bôi đen.
+  useEffect(() => {
+    if (!pendingQuestion) return;
+    setActiveTab("tutor");
+    handleSendAiMessage(pendingQuestion);
+    onPendingQuestionSent?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingQuestion]);
+
   const handleAddNote = () => {
     if (!newNoteText.trim()) return;
     // Ghi vào kho chung -> note hiện luôn ở lề trang tương ứng bên slide.
@@ -340,11 +453,33 @@ export function ReaderTabs({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button type="button" className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800" aria-label="Lịch sử trò chuyện">
+        <div className="relative flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setShowHistory((v) => !v)}
+            title="Lịch sử trò chuyện"
+            aria-label="Lịch sử trò chuyện"
+            aria-expanded={showHistory}
+            className={`relative flex h-8 w-8 items-center justify-center rounded-xl border transition-colors ${
+              showHistory
+                ? "border-[#124f8c] bg-sky-50 text-[#124f8c] dark:border-sky-600 dark:bg-sky-950 dark:text-sky-300"
+                : "border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+            }`}
+          >
             <Clock3 className="h-4 w-4" />
+            {convos.length > 1 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#124f8c] px-1 text-[9px] font-bold text-white dark:bg-sky-500 dark:text-slate-950">
+                {convos.length}
+              </span>
+            )}
           </button>
-          <button type="button" className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800" aria-label="Cuộc trò chuyện mới">
+          <button
+            type="button"
+            onClick={startNewConversation}
+            title="Cuộc trò chuyện mới"
+            aria-label="Cuộc trò chuyện mới"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
             <MessageSquarePlus className="h-4 w-4" />
           </button>
           <button
@@ -355,6 +490,59 @@ export function ReaderTabs({
           >
             <X className="h-4 w-4" />
           </button>
+
+          {/* Danh sách hội thoại đã lưu trong phiên */}
+          {showHistory && (
+            <div className="absolute right-0 top-10 z-50 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+              <div className="border-b border-slate-100 px-3 py-2 dark:border-slate-800">
+                <p className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200">
+                  Lịch sử trò chuyện
+                </p>
+                <p className="text-[10px] text-slate-400">
+                  {convos.length} cuộc · lưu trong phiên, đóng tab là hết
+                </p>
+              </div>
+              <div className="max-h-72 overflow-y-auto">
+                {convos.map((c) => {
+                  const isActive = c.id === activeId;
+                  const asked = c.messages.filter((m) => m.sender === "user").length;
+                  return (
+                    <div
+                      key={c.id}
+                      className={`flex items-start gap-2 border-b border-slate-50 px-3 py-2 last:border-0 dark:border-slate-800 ${
+                        isActive
+                          ? "bg-sky-50 dark:bg-sky-950/40"
+                          : "hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                      }`}
+                    >
+                      <button onClick={() => openConversation(c.id)} className="min-w-0 flex-1 text-left">
+                        <p
+                          className={`truncate text-[11px] font-semibold ${
+                            isActive
+                              ? "text-[#124f8c] dark:text-sky-300"
+                              : "text-slate-800 dark:text-slate-200"
+                          }`}
+                        >
+                          {c.title}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {asked ? `${asked} câu hỏi` : "Chưa hỏi gì"} · {c.at}
+                          {isActive && " · đang mở"}
+                        </p>
+                      </button>
+                      <button
+                        onClick={() => deleteConversation(c.id)}
+                        title="Xoá cuộc trò chuyện"
+                        className="mt-0.5 text-slate-300 hover:text-red-500"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -576,24 +764,36 @@ export function ReaderTabs({
             )}
 
             {/* Hai phạm vi tạo thẻ — đúng ý: cả bộ thì nhiều thẻ, 1 trang thì vài thẻ */}
-            {deck && (
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => generateCards("deck")}
-                  disabled={cardsLoading}
-                  className="rounded-xl bg-[#124f8c] px-2 py-2 text-[11px] font-bold text-white hover:bg-[#0b355f] disabled:opacity-50 dark:bg-sky-500 dark:text-slate-950"
-                >
-                  Cả bộ ({totalPages} trang) · 10 thẻ
-                </button>
-                <button
-                  onClick={() => generateCards("page")}
-                  disabled={cardsLoading}
-                  className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-[11px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                >
-                  Trang {currentPage} · 3 thẻ
-                </button>
-              </div>
-            )}
+            {deck && (() => {
+              // Nút nào ứng với bộ thẻ ĐANG hiển thị thì tô đậm — trước đây
+              // "Cả bộ" luôn xanh nên bấm "Trang N" xong không thấy gì đổi.
+              const scopeBtn = (active: boolean) =>
+                `rounded-xl px-2 py-2 text-[11px] font-bold transition-colors disabled:opacity-50 ${
+                  active
+                    ? "bg-[#124f8c] text-white hover:bg-[#0b355f] dark:bg-sky-500 dark:text-slate-950"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                }`;
+              return (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => generateCards("deck")}
+                    disabled={cardsLoading}
+                    aria-pressed={cardsScope === "deck"}
+                    className={scopeBtn(cardsScope === "deck")}
+                  >
+                    Cả bộ ({totalPages} trang) · 10 thẻ
+                  </button>
+                  <button
+                    onClick={() => generateCards("page")}
+                    disabled={cardsLoading}
+                    aria-pressed={cardsScope === "page"}
+                    className={scopeBtn(cardsScope === "page")}
+                  >
+                    Trang {currentPage} · 3 thẻ
+                  </button>
+                </div>
+              );
+            })()}
 
             {cardsLoading && (
               <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-6 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-800/50">

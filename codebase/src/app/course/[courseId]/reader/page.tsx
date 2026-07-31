@@ -9,6 +9,7 @@ import { PDFViewerCanvas, PEN_COLORS } from "@/components/PDFViewerCanvas";
 import { ReaderTabs } from "@/components/ReaderTabs";
 import { ConfusionModal } from "@/components/ConfusionModal";
 import { BootSplash } from "@/components/BootSplash";
+import { StuckNudge } from "@/components/StuckNudge";
 import { DayCurriculum, MaterialItem, StudyNote } from "@/types/vlearn";
 
 // Sample curriculum data based on VLearn API response for COMP2010
@@ -185,6 +186,11 @@ function ReaderPageInner() {
   const [isConfusionModalOpen, setIsConfusionModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"mindmap" | "flashcards" | "notes" | "tutor">("tutor");
   const [highlightedText, setHighlightedText] = useState<string | null>(null);
+  // Câu hỏi do popup nhắc sinh ra — đi cùng đường với highlightedText để
+  // ReaderTabs tự gửi, khỏi phải nhân đôi logic gọi AI.
+  const [nudgeAsk, setNudgeAsk] = useState<string | null>(null);
+  // Tăng mỗi lần học viên hỏi AI -> reset đồng hồ "đứng yên" của popup nhắc.
+  const [askCount, setAskCount] = useState(0);
   const [activeTool, setActiveTool] = useState<ReaderTool>("read");
   const [penColor, setPenColor] = useState(PEN_COLORS[0]);
   const [strokeWidth, setStrokeWidth] = useState(2.5);
@@ -193,6 +199,31 @@ function ReaderPageInner() {
   // MỘT kho ghi chú cá nhân duy nhất: note viết ở lề slide và note gõ ở tab
   // "Ghi chú" cùng đọc/ghi vào đây, nên hai nơi luôn khớp nhau.
   const [notes, setNotes] = useState<StudyNote[]>([]);
+
+  // Giữ ghi chú qua F5 trong cùng phiên (đóng tab là hết) — bản demo chưa có
+  // backend lưu trữ, nhưng mất sạch note chỉ vì lỡ refresh thì quá khó chịu.
+  const notesKey = `vlearn_notes_${selectedMaterial.id}`;
+  const notesRestoredRef = React.useRef<string | null>(null);
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(notesKey);
+      setNotes(saved ? (JSON.parse(saved) as StudyNote[]) : []);
+    } catch {
+      setNotes([]);
+    }
+    notesRestoredRef.current = notesKey;
+  }, [notesKey]);
+
+  useEffect(() => {
+    // Chỉ ghi sau khi đã khôi phục xong cho đúng tài liệu, tránh ghi đè rỗng
+    // lên note cũ ngay lúc vừa đổi tài liệu.
+    if (notesRestoredRef.current !== notesKey) return;
+    try {
+      sessionStorage.setItem(notesKey, JSON.stringify(notes));
+    } catch {
+      // Bị chặn hoặc đầy -> bỏ qua.
+    }
+  }, [notes, notesKey]);
 
   const addNote = (n: Omit<StudyNote, "id" | "time">) =>
     setNotes((prev) => [
@@ -207,10 +238,6 @@ function ReaderPageInner() {
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)));
   const removeNote = (id: string) => setNotes((prev) => prev.filter((n) => n.id !== id));
 
-  // Đổi tài liệu -> xoá ghi chú của tài liệu trước (bản demo chưa có lưu trữ).
-  useEffect(() => {
-    setNotes([]);
-  }, [selectedMaterial.id]);
 
   const totalPages = selectedMaterial.page_count || 23;
 
@@ -318,6 +345,11 @@ function ReaderPageInner() {
           initialTab={activeTab}
           highlightedText={highlightedText}
           onHighlightConsumed={() => setHighlightedText(null)}
+          pendingQuestion={nudgeAsk}
+          onPendingQuestionSent={() => {
+            setNudgeAsk(null);
+            setAskCount((n) => n + 1);
+          }}
           currentPage={currentPage}
           totalPages={totalPages}
           materialTitle={selectedMaterial.title}
@@ -327,6 +359,18 @@ function ReaderPageInner() {
           onRemoveNote={removeNote}
         />
       </div>
+
+      {/* Nhắc nhẹ khi đứng lâu ở một trang mà chưa hỏi gì */}
+      <StuckNudge
+        page={currentPage}
+        activityToken={askCount}
+        onAskHelp={(p) => {
+          setActiveTab("tutor");
+          setIsDrawerOpen(true);
+          setHighlightedText(null);
+          setNudgeAsk(`Mình chưa hiểu rõ nội dung trang ${p}, bạn giải thích lại giúp mình nhé?`);
+        }}
+      />
 
       {/* Confusion Feedback Modal */}
       <ConfusionModal
