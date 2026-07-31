@@ -56,7 +56,12 @@ function buildGreeting(
   deck?: "d1" | "d2" | "rag1" | "rag2" | "rag3" | "rag4" | "rag5" | "law"
 ) {
   return deck
-    ? `Xin chào! Mình là AI Tutor VLearn. Bạn đang xem tài liệu "${materialTitle}" (Trang ${currentPage}/${totalPages}). Bạn có thắc mắc gì cần giải đáp không?`
+    ? // Câu thứ hai là ONBOARDING thêm sau vòng validation CP5: 2/6 người thử
+      // không tự tìm ra thao tác bôi đen, trong đó người duy nhất không cam kết
+      // dùng thật nêu đúng lý do này. Bôi đen là thao tác lõi của lát cắt
+      // (bằng chứng CP1: giảm tỷ lệ "không tìm thấy nội dung" 21,1% -> 2,0%),
+      // không ai khám phá ra thì lợi thế đó mất trắng.
+      `Xin chào! Mình là AI Tutor VLearn. Bạn đang xem tài liệu "${materialTitle}" (Trang ${currentPage}/${totalPages}).\n\n💡 Mẹo: bôi đen một đoạn bất kỳ trên slide rồi bấm "Hỏi AI" — mình trả lời đúng đoạn đó và kèm số trang để bạn kiểm chứng lại. Hoặc cứ gõ câu hỏi bên dưới.`
     : `Tài liệu "${materialTitle}" chưa có học liệu thật trong bản demo này — AI Tutor hiện chỉ ground được vào Day 01 và Day 02. Bạn thử chuyển sang một trong hai tài liệu đó nhé.`;
 }
 
