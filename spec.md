@@ -185,6 +185,19 @@ Ghi chú cá nhân là thật nhưng chỉ lưu trong phiên (chưa có backend)
 | 11 | 19/20 (95%) | Đạt | Củng cố lại luật BƯỚC 1 trong prompt (nêu rõ áp dụng bất kể có đủ dữ liệu trả lời hay không) — `C03` vẫn chưa đạt. Dừng tinh chỉnh tại đây |
 | 12-16 | 19/20 (95%) | Đạt | Các lượt regression khi mở rộng corpus từ 2 lên 7 deck (thêm `rag1`-`rag5`) và chỉnh UI — số không đổi, `C03` vẫn là case duy nhất chưa đạt |
 | 17 | 19/20 (95%) | Đạt | **Regression sau 29 commit** kể từ lượt 16, gồm cả thay đổi vào chính lời gọi AI: thêm trường `targetPage` (cho phép hỏi trang khác trang đang mở), nhét lịch sử hội thoại vào prompt, thêm deck `law`, và 2 endpoint mới dùng chung hạ tầng. Số giữ nguyên 95% — các thay đổi không phá quyết định trung tâm. `C03` vẫn là case duy nhất chưa đạt |
+| 18 | 19/20 (95%) | Đạt | **Chạy trên bản DEPLOY thật** (`https://minihackathon.ai42e.com`), không phải máy local: `EVAL_BASE=https://minihackathon.ai42e.com node eval/run.mjs`. Cùng kết quả với lượt 17 chạy local — xác nhận môi trường production có đủ API key, corpus tĩnh đi kèm build, và rate limit không chặn nhầm bộ 20 case. `C03` vẫn là case duy nhất chưa đạt |
+
+**Về học liệu dùng để đo:** golden set chạy trên `d1-slide-hackathon.pdf` (29 trang) — `eval/run.mjs` không truyền `deck` nên route dùng mặc định `d1`. Giữ nguyên deck này qua cả 18 lượt để các số so sánh được với nhau và với quality bar đã chốt lúc 23:59 N1. Lưu ý khi trình bày: bản demo hiển thị `ChatbotAI - Law.pdf` và 5 bài báo RAG, tức **con số 95% đo trên deck d1 chứ không phải deck đang demo** — cần nói rõ điều này thay vì để người nghe tự suy ra.
+
+**Cách tái lập (TA kiểm chứng được):**
+
+```
+# đo trên bản deploy
+EVAL_BASE=https://minihackathon.ai42e.com node eval/run.mjs
+
+# đo trên máy local (server phải chạy sẵn)
+EVAL_BASE=http://localhost:3000 node eval/run.mjs
+```
 
 **Phân tích `C03` (lượt 10-11, chưa đạt):** câu hỏi chỉ có một chữ "tóm tắt" (lớp ②, không có từ chỉ phạm vi) — kỳ vọng `sufficient=false` + hỏi lại đúng một câu. Model trả lời `sufficient=true` kèm bản tóm tắt đầy đủ cả bộ, dù luật BƯỚC 1 nêu rõ *"bất kể bạn có đủ dữ liệu để trả lời hay không"*. Đây là giới hạn thật của model khi có full-text context: nó ưu tiên "trả lời tốt vì có thể" hơn "tuân luật hỏi lại theo dạng câu hỏi". Không hardcode chặn cứng ở server (khác 2 điều kiện cứng của quality bar) vì phát hiện "câu hỏi có mơ hồ không" là heuristic khó chặn đáng tin bằng regex như citation/demand-content — giữ làm case chưa đạt, không hạ chuẩn hay ép qua.
 
