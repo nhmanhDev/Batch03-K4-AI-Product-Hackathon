@@ -561,6 +561,7 @@ def generate_text(prompt, model, max_tokens=50):
               trang vẫn kín). pointer-events-none để không cản bôi đen/copy bên dưới. */}
           <div
             aria-hidden="true"
+            data-watermark
             className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-2xl select-none"
             style={{
               backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(

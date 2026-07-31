@@ -167,6 +167,20 @@
     display: block !important;
     max-width: 100% !important;
   }
+
+  /* Watermark PHẢI in ra để bảo vệ bản quyền. Trình duyệt mặc định bỏ mọi ảnh
+     nền khi in (tiết kiệm mực) nên nếu không ép print-color-adjust thì bản in
+     sẽ sạch trơn — đúng thứ cần tránh. Đồng thời đậm hơn bản trên màn hình vì
+     mực in nhạt hơn pixel, và nâng z-index để nằm đè lên canvas PDF. */
+  [data-watermark] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    z-index: 2147483647 !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='150'%3E%3Ctext x='120' y='75' font-size='15' font-weight='bold' font-family='sans-serif' fill='%23334155' fill-opacity='0.22' text-anchor='middle' transform='rotate(-28 120 75)'%3Enhmanhai42e%3C/text%3E%3C/svg%3E") !important;
+    background-repeat: repeat !important;
+  }
 }
 
 /*

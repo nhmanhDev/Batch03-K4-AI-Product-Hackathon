@@ -219,14 +219,17 @@ export function ReaderTabs({
       }
 
       // Badge = quyết định phạm vi của AI, hiện TRƯỚC nội dung (HAX G2)
+      // Trang được hỏi có thể khác trang đang mở ("tóm tắt trang 5" khi đang ở
+      // trang 1) — badge phải nói đúng trang AI dựa vào, không phải trang đang xem.
+      const answeredPage = d.targetPage || currentPage;
       const badge =
         d.scope === "out_of_scope"
           ? "⚠️ NGỮ CẢNH: NGOÀI PHẠM VI HỌC LIỆU"
           : !d.sufficient
-            ? `⚠️ CHƯA ĐỦ CĂN CỨ${d.scope === "page" ? ` Ở TRANG ${currentPage}` : ""}`
+            ? `⚠️ CHƯA ĐỦ CĂN CỨ${d.scope === "page" ? ` Ở TRANG ${answeredPage}` : ""}`
             : d.scope === "deck"
               ? `📚 NGỮ CẢNH: CẢ BỘ SLIDE (${d._meta?.totalPages ?? totalPages} TRANG)`
-              : `📌 NGỮ CẢNH: TRANG ${currentPage} / ${totalPages}`;
+              : `📌 NGỮ CẢNH: TRANG ${answeredPage} / ${totalPages}`;
 
       const citation = d.citations?.length
         ? `[Trang ${d.citations.join(", ")} - ${materialTitle}]`
