@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Download, Maximize2, X } from "lucide-react";
 
 /**
@@ -175,6 +175,45 @@ export function MindMapView({ root, title }: { root: MindNode; title: string }) 
   const [open, setOpen] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
 
+  /**
+   * Mở popup thì đẩy thêm một mốc lịch sử, để nút Back của trình duyệt ĐÓNG
+   * popup thay vì rời hẳn trang reader (trước đây Back nhảy về /my-courses,
+   * mất luôn tài liệu đang đọc). Đóng bằng nút X thì tự lùi lại mốc đó.
+   */
+  useEffect(() => {
+    if (!open) return;
+    window.history.pushState({ mindmap: true }, "");
+    const onPop = () => setOpen(false);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [open]);
+
+  const close = () => {
+    if (window.history.state?.mindmap) window.history.back();
+    else setOpen(false);
+  };
+
+  // Đang mở popup thì khoá cuộn nền cho khỏi trôi trang phía sau.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  // Esc cũng đóng — thói quen chung của mọi modal.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   /** Xuất PNG: serialize SVG -> vẽ lên canvas (x2 cho nét) -> tải về. */
   const downloadPng = () => {
     const svg = svgRef.current;
@@ -222,7 +261,7 @@ export function MindMapView({ root, title }: { root: MindNode; title: string }) 
       {open && (
         <div
           className="fixed inset-0 z-[120] flex flex-col bg-slate-900/80 backdrop-blur-sm"
-          onClick={() => setOpen(false)}
+          onClick={close}
         >
           <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-3">
             <p className="min-w-0 truncate text-sm font-bold text-white">Sơ đồ tư duy · {title}</p>
@@ -238,7 +277,7 @@ export function MindMapView({ root, title }: { root: MindNode; title: string }) 
                 Tải PNG
               </button>
               <button
-                onClick={() => setOpen(false)}
+                onClick={close}
                 aria-label="Đóng sơ đồ"
                 className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 text-white hover:bg-white/25"
               >

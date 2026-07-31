@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ReaderSidebar } from "@/components/ReaderSidebar";
 import { ReaderToolbar, ReaderTool } from "@/components/ReaderToolbar";
@@ -167,8 +168,15 @@ const SAMPLE_CURRICULUM: DayCurriculum[] = [
   }
 ];
 
-export default function ReaderPage() {
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem>(SAMPLE_CURRICULUM[0].items[0]);
+const ALL_MATERIALS = SAMPLE_CURRICULUM.flatMap((d) => d.items);
+
+function ReaderPageInner() {
+  const searchParams = useSearchParams();
+  // ?slide=<public_code> giữ đúng tài liệu đang đọc trong URL, để chia sẻ link
+  // hoặc bấm Back/Refresh vẫn quay lại đúng chỗ thay vì nhảy về tài liệu đầu.
+  const initialMaterial =
+    ALL_MATERIALS.find((m) => m.public_code === searchParams.get("slide")) ?? ALL_MATERIALS[0];
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem>(initialMaterial);
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -209,7 +217,22 @@ export default function ReaderPage() {
   const handleSelectMaterial = (item: MaterialItem) => {
     setSelectedMaterial(item);
     setCurrentPage(1);
+    // Ghi vào URL nhưng KHÔNG thêm mốc lịch sử mới (replace): đổi tài liệu là
+    // đổi ngữ cảnh đang đọc, không phải một trang mới để bấm Back quay lại.
+    const url = new URL(window.location.href);
+    url.searchParams.set("slide", item.public_code);
+    window.history.replaceState(null, "", url);
   };
+
+  // Đồng bộ lần đầu: URL chưa có ?slide thì ghi tài liệu đang mở vào cho khớp.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("slide") !== selectedMaterial.public_code) {
+      url.searchParams.set("slide", selectedMaterial.public_code);
+      window.history.replaceState(null, "", url);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex h-screen flex-col bg-slate-50 text-slate-900 overflow-hidden dark:bg-slate-950 dark:text-slate-100">
@@ -313,5 +336,14 @@ export default function ReaderPage() {
         currentPage={currentPage}
       />
     </div>
+  );
+}
+
+/** useSearchParams bắt buộc nằm trong Suspense (Next.js App Router). */
+export default function ReaderPage() {
+  return (
+    <Suspense fallback={null}>
+      <ReaderPageInner />
+    </Suspense>
   );
 }
